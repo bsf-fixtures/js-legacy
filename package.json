@@ -1,0 +1,17 @@
+{
+  "name": "js-legacy",
+  "version": "0.0.3",
+  "private": true,
+  "description": "Build Software Factory fixture: a messy JS app with no tests",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.16.0"
+  }
+}
