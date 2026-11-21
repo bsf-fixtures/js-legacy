@@ -1,7 +1,7 @@
-// helpers. some of these are duplicated in handlers.js, didn't get round to it
+// helpers. pure functions over values: no db, no req/res
 
 function money(n) {
-  return "$" + (n / 100).toFixed(2);
+  return "$" + money2(n);
 }
 
 function total(list) {
@@ -12,7 +12,7 @@ function total(list) {
   return t;
 }
 
-// same as money() but with no dollar sign. used in the csv
+// cents to a plain amount, no dollar sign. used in the csv, and by money()
 function money2(n) {
   return (n / 100).toFixed(2);
 }
