@@ -1,0 +1,13 @@
+{
+  "role": "verifier",
+  "needs": "commands.test set to `npm test` in .factory/sandbox/manifest.json, and the `capabilities.not_exercised` entry titled \"Automated tests and total coverage\" rewritten, now that the repo has a test runner. This PR adds `\"test\": \"node --test\"` to package.json and test/eslint-config.test.js. I ran `npm test` by hand in this sandbox and it passes 4/4, so the sandbox CAN exercise the repo's tests — but commands.test is still null, so the tests gate has no command to run and stays blind to them. Every acceptance check for this PR was verifiable by hand; nothing here turns a check into a failure.",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    "package.json",
+    "test/eslint-config.test.js"
+  ],
+  "why": "The manifest was frozen at 2026-11-21T04:45:08Z, when the repo genuinely had no test framework, no test files and no test script, so commands.test: null was correct at the time. That fact changed in this PR. The manifest itself predicted this amendment: its not_exercised entry says \"adding that runner is a package.json change that this manifest's install command will pick up without an amendment\", and the runbook says \"whoever adds it should also set commands.test through an amendment so the gate stops being blind\". The runner is node's built-in `node --test`, so `npm ci` already provides everything needed (eslint is the only import, and it is an existing devDependency) — no new service, stub or egress is required, only the command field. Verified in this sandbox: `npm ci` leaves package-lock.json unchanged, and `npm test` passes 4/4 from a clean install, repeatably and independent of cwd.",
+  "work_item": "wi_01M7YGYNWVHW8E4K9EJB34BEFD",
+  "reported_at": "2026-11-21T08:29:53.451Z",
+  "reports": 1
+}
