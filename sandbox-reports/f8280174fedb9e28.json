@@ -1,0 +1,15 @@
+{
+  "role": "builder",
+  "needs": "commands.test set in the sandbox manifest, so the tests gate and the coverage gate actually run this repo's new tests",
+  "paths": [
+    "package.json",
+    "test/util.test.js",
+    "test/report.test.js",
+    "src/report.js",
+    "src/util.js"
+  ],
+  "why": "This PR adds the repo's first tests and the runner that executes them: Node's built-in test runner, via a new `test` script in package.json (`node --test`). No new dependency was needed, so `npm ci` already installs everything required. But .factory/sandbox/manifest.json still records `commands.test` as null, and the manifest is protected, so I could not set it. Consequences, both verified here: `bsf gates tests` reads commands.test from the default branch's manifest, sees null and concludes neutral with 'this repo has no test command', so the 7 new tests are never run by a gate; and `bsf gates coverage` finds no coverage/lcov.info, so diff coverage is not measured either (it passes only because floor_pct is 0). Suggested amendment: set commands.test to `mkdir -p coverage && node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info`. I ran exactly that command in the sandbox: 7 tests pass, and it writes coverage/lcov.info in the layout bsf's readCoverage() expects, reporting src/report.js at 24/24 lines and every changed line of src/util.js covered. Two things to decide while amending: the plain `npm test` in package.json deliberately omits the coverage flags so it leaves no untracked coverage/ directory for a developer, and the lcov file also contains one record for /run/awf-lib/trust/node-trust.cjs, which is this sandbox's own node wrapper rather than repo code and will drag total_pct down if it is not excluded.",
+  "work_item": "wi_01M7YJRKWSDQ2BA0J02X0TC3AC",
+  "reported_at": "2026-11-21T08:46:36.307Z",
+  "reports": 1
+}
