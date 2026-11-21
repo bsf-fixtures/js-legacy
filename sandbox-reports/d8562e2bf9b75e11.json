@@ -14,5 +14,6 @@
   "why": "This PR adds the test runner the manifest said was missing: package.json now has `\"test\": \"node --test\"` and tests/ holds 52 tests over all five files in src/. The frozen manifest still records commands.test as null, and its capabilities.not_exercised entry 'Automated tests and total coverage' (paths: src/) is now out of date. I ran `npm test` by hand in this sandbox — 52 pass, 0 fail, repeatably, including under the closed environment (PATH, HOME, TMPDIR, LANG, CI, PORT only) and while the app held PORT 3000 — so the suite works here; what the sandbox cannot do is run it as a gate. Until commands.test is amended the tests gate stays blind and total coverage stays pinned at the 0% floor in .factory/guardrails/coverage.json, even though node's own coverage reporter measures src/ at 100% of lines for db.js, handlers.js, report.js and util.js and 82.61% for server.js (only the app.listen callback, lines 18-21, is uncovered in-process). The manifest already anticipated this: 'whoever adds it should also set commands.test through an amendment so the gate stops being blind.'",
   "work_item": "wi_01M7YGS7KXJCTHVJ9J5RH6JKC2",
   "reported_at": "2026-11-21T08:08:24.079Z",
-  "reports": 1
+  "reports": 1,
+  "dispatched_at": "2026-11-21T15:46:43.523Z"
 }

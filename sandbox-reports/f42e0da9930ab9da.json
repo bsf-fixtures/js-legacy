@@ -9,5 +9,6 @@
   "why": ".factory/sandbox/** is protected by .factory/definition/policy.yaml, so the builder cannot set commands.test itself, and the gates read the manifest from main rather than from the PR. runbook.md anticipated exactly this: \"whoever adds it should also set commands.test through an amendment so the gate stops being blind.\" Everything else was exercisable here: `npm test` runs all 52 tests green in the sandbox environment, `npm run lint` is clean, and each test was mutation-checked against a deliberate break in the file it covers.",
   "work_item": "wi_01M7YGS7KXJCTHVJ9J5RH6JKC2",
   "reported_at": "2026-11-21T07:56:02.232Z",
-  "reports": 1
+  "reports": 1,
+  "dispatched_at": "2026-11-21T15:46:43.523Z"
 }
