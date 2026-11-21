@@ -14,7 +14,7 @@
   "body": "found by the gardener\n\nFiles:\n- src/util.js\n- src/db.js",
   "priority": "normal",
   "fingerprint": "sha256:63936c8ca0d91c03613e05836a60fd00a5afc2150ecb57475f0bc23498b448df",
-  "status": "running",
+  "status": "queued",
   "runs": [
     "run_01M7YK0NXPDFNN6VABYVYC7JHE"
   ],
