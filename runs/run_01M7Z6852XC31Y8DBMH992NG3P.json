@@ -1,0 +1,46 @@
+{
+  "schema": "run/1",
+  "id": "run_01M7Z6852XC31Y8DBMH992NG3P",
+  "work_item": "wi_01M7Z67H35ZKN03B2NQWNQ3SWW",
+  "pipeline": "gardening",
+  "actor": {
+    "kind": "agent",
+    "harness": "claude-code"
+  },
+  "started_at": "2026-11-21T13:55:34.109Z",
+  "ended_at": "2026-11-21T14:08:07.133Z",
+  "duration_sec": 753,
+  "outcome": "draft_pr",
+  "pr": 42,
+  "steps": [
+    {
+      "role": "builder",
+      "model": "unknown",
+      "attempt": 1,
+      "duration_sec": 0,
+      "tokens": {
+        "in": 46,
+        "out": 13298
+      },
+      "cost_usd": 1.4105,
+      "transcript": "",
+      "exit": "ok"
+    }
+  ],
+  "gates": [
+    {
+      "gate": "static",
+      "attempt": 1,
+      "result": "pass",
+      "commit": "d89d66b5248c44a9553c47481c872f0c87c938f9"
+    },
+    {
+      "gate": "verification",
+      "attempt": 1,
+      "result": "pass",
+      "commit": "d89d66b5248c44a9553c47481c872f0c87c938f9"
+    }
+  ],
+  "cost_usd": 1.4105,
+  "escalated": false
+}
