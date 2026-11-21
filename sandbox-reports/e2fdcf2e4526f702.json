@@ -1,0 +1,17 @@
+{
+  "role": "builder",
+  "needs": "commands.test in .factory/sandbox/manifest.json set to \"npm test\", so the tests gate runs this repo's new test suite and the coverage gate can read coverage/lcov.info. It is currently null, which was correct when the repo had no tests and is now stale.",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    "package.json",
+    "tests/util.test.js",
+    "tests/db.test.js",
+    "tests/report.test.js",
+    "tests/routes.test.js",
+    "tests/helpers.js"
+  ],
+  "why": "This PR brings the repo's first tests and the runner that executes them: node's built-in test runner, via a new `test` script in package.json, adding no dependency. The suite runs green here (31 tests, 98.04% line coverage of src/) and writes coverage/lcov.info in the format `bsf gates coverage` reads. But .factory/sandbox/ is a protected path and gardening may only change code and tests, so I cannot set commands.test myself. Until the manifest is amended on the default branch, `bsf gates tests` resolves the test command to `none` and reports neutral, and `bsf gates coverage` finds no report and — with floor_pct at 0 — also reports neutral. The gates therefore pass without having run a single one of these tests. runbook.md and history.md both predicted this exact hand-off: 'whoever adds it should also set commands.test through an amendment so the gate stops being blind'. .factory/definition/context/runbook.md also still says 'This repo has no tests' and 'commands.test is null', which the definition pipeline should correct in the same amendment.",
+  "work_item": "wi_01M7YGS7KXRFFWPFSXXZQKPJ6X",
+  "reported_at": "2026-11-21T07:57:35.747Z",
+  "reports": 1
+}
