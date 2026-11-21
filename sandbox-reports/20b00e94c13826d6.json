@@ -1,0 +1,13 @@
+{
+  "role": "builder",
+  "needs": "commands.test set to `npm test`, and the `Automated tests and total coverage` entry removed from capabilities.not_exercised",
+  "paths": [
+    "package.json",
+    "tests/eslint.config.test.js",
+    ".factory/sandbox/manifest.json"
+  ],
+  "why": "The manifest records commands.test as null and lists automated tests under capabilities.not_exercised because the repo had no test framework, no test files and no test script. This PR adds all three: a `test` script running node's built-in runner (`node --test`, no new dependency) and tests/eslint.config.test.js, which drives the eslint Node API against the committed eslint.config.mjs. `npm test` passes here against the sandbox environment (PORT only) after `npm ci`, and I verified each assertion fails when the matching property of the config is removed. The tests gate still has nothing to run, because it reads commands.test from the manifest and that is null; .factory/sandbox/** is protected by policy.yaml so I could not set it myself. Setting commands.test to `npm test` is all that is needed — the runner is node's own, so the existing `npm ci` install command already provides it.",
+  "work_item": "wi_01M7YJRKWSZQH3X68JZB970SB5",
+  "reported_at": "2026-11-21T08:53:55.818Z",
+  "reports": 1
+}
