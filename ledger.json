@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T09:41:46.385Z",
+  "updated_at": "2026-11-21T09:41:21.189Z",
   "open": [
     {
       "work_item": "wi_01M7Y4H6GSWY2F7HGEA1BGSZGM",
@@ -28,177 +28,6 @@
       "created_at": "2026-11-21T07:40:25.085Z",
       "fingerprint": "sha256:38da87a13e3c3de9d66d99e92e84a0390ffaf029cb9c28e5937a52abc588b57e",
       "pr": 11
-    },
-    {
-      "work_item": "wi_01M7YGS7KXRFFWPFSXXZQKPJ6X",
-      "pipeline": "gardening",
-      "status": "in_review",
-      "priority": "normal",
-      "created_at": "2026-11-21T07:40:25.085Z",
-      "fingerprint": "sha256:3838c0b7387a810600b8196181dbab7e327e9191f10e1ee9d64d2146bb850339",
-      "pr": 12
-    },
-    {
-      "work_item": "wi_01M7YGYNWV7PWW4ANARRCZTC5N",
-      "pipeline": "gardening",
-      "status": "in_review",
-      "priority": "normal",
-      "created_at": "2026-11-21T07:43:23.547Z",
-      "fingerprint": "sha256:38da87a13e3c3de9d66d99e92e84a0390ffaf029cb9c28e5937a52abc588b57e",
-      "pr": 13
-    },
-    {
-      "work_item": "wi_01M7YGYNWVCDVT90GGKS6D50KB",
-      "pipeline": "gardening",
-      "status": "in_review",
-      "priority": "normal",
-      "created_at": "2026-11-21T07:43:23.547Z",
-      "fingerprint": "sha256:ef76e8554292e0e93788f3527346be38a9164d7120d9f244dee9225e6150c237",
-      "pr": 14
-    },
-    {
-      "work_item": "wi_01M7YGYNWVD9W3S5VK4M9BHC1P",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T07:43:23.547Z",
-      "fingerprint": "sha256:0cbbe6c2eb44970aa0241203b40f093fc6731d25c717cee43fa7796fbaabd0e4"
-    },
-    {
-      "work_item": "wi_01M7YGYNWVV39K31B4V2SQ0AFX",
-      "pipeline": "gardening",
-      "status": "in_review",
-      "priority": "normal",
-      "created_at": "2026-11-21T07:43:23.547Z",
-      "fingerprint": "sha256:dbaa195067b40967e1e89d69296af0428d6a38ae5d61ee165fffcd0d627cb70a",
-      "pr": 20
-    },
-    {
-      "work_item": "wi_01M7YH2HPVH3YCXTH7H08G7S0C",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T07:45:30.331Z",
-      "fingerprint": "sha256:413f471c10863e49c3996b337cfa864acfb310286250a263414c177165f21ee0"
-    },
-    {
-      "work_item": "wi_01M7YHFMYF0MHYCEHM31CFM3M9",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T07:52:39.631Z",
-      "fingerprint": "sha256:f0c1157af06f75c3355556a38f249cae4bedafdbc869c16f485507c366c836b3",
-      "pr": 26
-    },
-    {
-      "work_item": "wi_01M7YJRKWS7V0XBP8ZG8HFTG33",
-      "pipeline": "gardening",
-      "status": "queued",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:15:02.041Z",
-      "fingerprint": "sha256:63936c8ca0d91c03613e05836a60fd00a5afc2150ecb57475f0bc23498b448df"
-    },
-    {
-      "work_item": "wi_01M7YJRKWSBBEKX8AMQAY8RW6W",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:15:02.041Z",
-      "fingerprint": "sha256:082bd1106b0d2dcd9775b3897abf30587e0997d2d01a5692d0035705f03bf4ef",
-      "pr": 28
-    },
-    {
-      "work_item": "wi_01M7YJRKWSDQ2BA0J02X0TC3AC",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:15:02.041Z",
-      "fingerprint": "sha256:b215849bfb6a04f604e7845d4a1e3781201c01ef349842be3989661018edf4a6",
-      "pr": 30
-    },
-    {
-      "work_item": "wi_01M7YJRKWSPZDNGY5HW6QXPZYM",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:15:02.041Z",
-      "fingerprint": "sha256:38da87a13e3c3de9d66d99e92e84a0390ffaf029cb9c28e5937a52abc588b57e",
-      "pr": 31
-    },
-    {
-      "work_item": "wi_01M7YJRKWSZQH3X68JZB970SB5",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:15:02.041Z",
-      "fingerprint": "sha256:3838c0b7387a810600b8196181dbab7e327e9191f10e1ee9d64d2146bb850339"
-    },
-    {
-      "work_item": "wi_01M7YK24AA5DKDJXQJXF8K8KDF",
-      "pipeline": "gardening",
-      "status": "queued",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:20:13.770Z",
-      "fingerprint": "sha256:38da87a13e3c3de9d66d99e92e84a0390ffaf029cb9c28e5937a52abc588b57e"
-    },
-    {
-      "work_item": "wi_01M7YK24AA8E2DKHRHYR7H3YST",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:20:13.770Z",
-      "fingerprint": "sha256:3838c0b7387a810600b8196181dbab7e327e9191f10e1ee9d64d2146bb850339"
-    },
-    {
-      "work_item": "wi_01M7YK24AAPJZNV48BS7HE51JV",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:20:13.770Z",
-      "fingerprint": "sha256:f137fdd0a90817db900c7aa89bb4e73514b278e2ce81d72a764744d4bd19f624"
-    },
-    {
-      "work_item": "wi_01M7YK6DNF35J41BE16MVFXC0M",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:22:34.415Z",
-      "fingerprint": "sha256:c3ff33c4e222e3ea5a7c7e8a38dfcb66f73025e49d77f77ed40ab4e0f39c60e5"
-    },
-    {
-      "work_item": "wi_01M7YKB83Y12SPBPM53ZC2BDY4",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:25:12.574Z",
-      "fingerprint": "sha256:476455f19dcd51331dfa29f431dbbb1d3644e6b02782973657f9695c51e976c1"
-    },
-    {
-      "work_item": "wi_01M7YKF97H6VDN2RWRVCNKJYE2",
-      "pipeline": "gardening",
-      "status": "queued",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:27:24.785Z",
-      "fingerprint": "sha256:3838c0b7387a810600b8196181dbab7e327e9191f10e1ee9d64d2146bb850339"
-    },
-    {
-      "work_item": "wi_01M7YKF97HXPVTX11RV9SXNY9G",
-      "pipeline": "gardening",
-      "status": "running",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:27:24.785Z",
-      "fingerprint": "sha256:38da87a13e3c3de9d66d99e92e84a0390ffaf029cb9c28e5937a52abc588b57e"
-    },
-    {
-      "work_item": "wi_01M7YN0BPETXX53CAK04A14Z50",
-      "pipeline": "gardening",
-      "status": "queued",
-      "fingerprint": "sha256:f7e884582e1ac8122733b30c853c1563b76deb17216657060851d4e159a99a2b",
-      "priority": "normal",
-      "created_at": "2026-11-21T08:54:12.942Z",
-      "fixes": [
-        "no test runner; untested behaviour in src"
-      ]
     }
   ],
   "recent": [
@@ -209,10 +38,97 @@
       "pr": 15
     },
     {
+      "work_item": "wi_01M7YGS7KXRFFWPFSXXZQKPJ6X",
+      "status": "rejected",
+      "pr": 12
+    },
+    {
+      "work_item": "wi_01M7YGYNWV7PWW4ANARRCZTC5N",
+      "status": "rejected",
+      "pr": 13
+    },
+    {
+      "work_item": "wi_01M7YGYNWVCDVT90GGKS6D50KB",
+      "status": "rejected",
+      "pr": 14
+    },
+    {
+      "work_item": "wi_01M7YGYNWVD9W3S5VK4M9BHC1P",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YGYNWVV39K31B4V2SQ0AFX",
+      "status": "rejected",
+      "pr": 20
+    },
+    {
+      "work_item": "wi_01M7YH2HPVH3YCXTH7H08G7S0C",
+      "status": "rejected"
+    },
+    {
       "work_item": "wi_01M7YH2HPVHHGWTCXTPGC5HTQ2",
       "status": "rejected",
-      "fingerprint": "sha256:f137fdd0a90817db900c7aa89bb4e73514b278e2ce81d72a764744d4bd19f624",
       "pr": 23
+    },
+    {
+      "work_item": "wi_01M7YHFMYF0MHYCEHM31CFM3M9",
+      "status": "rejected",
+      "pr": 26
+    },
+    {
+      "work_item": "wi_01M7YJRKWS7V0XBP8ZG8HFTG33",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YJRKWSBBEKX8AMQAY8RW6W",
+      "status": "rejected",
+      "pr": 28
+    },
+    {
+      "work_item": "wi_01M7YJRKWSDQ2BA0J02X0TC3AC",
+      "status": "rejected",
+      "pr": 30
+    },
+    {
+      "work_item": "wi_01M7YJRKWSPZDNGY5HW6QXPZYM",
+      "status": "rejected",
+      "pr": 31
+    },
+    {
+      "work_item": "wi_01M7YJRKWSZQH3X68JZB970SB5",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YK24AA5DKDJXQJXF8K8KDF",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YK24AA8E2DKHRHYR7H3YST",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YK24AAPJZNV48BS7HE51JV",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YK6DNF35J41BE16MVFXC0M",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YKB83Y12SPBPM53ZC2BDY4",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YKF97H6VDN2RWRVCNKJYE2",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YKF97HXPVTX11RV9SXNY9G",
+      "status": "rejected"
+    },
+    {
+      "work_item": "wi_01M7YN0BPETXX53CAK04A14Z50",
+      "status": "rejected"
     }
   ],
   "merge_queue": []

@@ -14,10 +14,11 @@
   "body": "found by the gardener\n\nFiles:\n- package.json\n- src/util.test.js",
   "priority": "normal",
   "fingerprint": "sha256:f7e884582e1ac8122733b30c853c1563b76deb17216657060851d4e159a99a2b",
-  "status": "queued",
+  "status": "rejected",
   "runs": [],
   "pr": null,
   "parent": null,
   "related": [],
-  "spec": null
+  "spec": null,
+  "closed_at": "2026-11-21T09:41:21.189Z"
 }

@@ -14,12 +14,13 @@
   "body": "5 file(s) changed in the last 14 days with no test in the same commit\n\nFiles:\n- src/db.js\n- src/handlers.js\n- src/report.js\n- src/server.js\n- src/util.js",
   "priority": "normal",
   "fingerprint": "sha256:38da87a13e3c3de9d66d99e92e84a0390ffaf029cb9c28e5937a52abc588b57e",
-  "status": "running",
+  "status": "rejected",
   "runs": [
     "run_01M7YM1JMV954EA99V6WJYN869"
   ],
   "pr": null,
   "parent": null,
   "related": [],
-  "spec": null
+  "spec": null,
+  "closed_at": "2026-11-21T09:41:21.189Z"
 }

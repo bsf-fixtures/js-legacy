@@ -14,12 +14,13 @@
   "body": "found by the gardener\n\nFiles:\n- src/util.js\n- src/db.js",
   "priority": "normal",
   "fingerprint": "sha256:63936c8ca0d91c03613e05836a60fd00a5afc2150ecb57475f0bc23498b448df",
-  "status": "queued",
+  "status": "rejected",
   "runs": [
     "run_01M7YK0NXPDFNN6VABYVYC7JHE"
   ],
   "pr": null,
   "parent": null,
   "related": [],
-  "spec": null
+  "spec": null,
+  "closed_at": "2026-11-21T09:41:21.189Z"
 }

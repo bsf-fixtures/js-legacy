@@ -14,12 +14,13 @@
   "body": "1 file(s) changed in the last 14 days with no test in the same commit\n\nFiles:\n- eslint.config.mjs",
   "priority": "normal",
   "fingerprint": "sha256:3838c0b7387a810600b8196181dbab7e327e9191f10e1ee9d64d2146bb850339",
-  "status": "in_review",
+  "status": "rejected",
   "runs": [
     "run_01M7YGV7QQAH21G6DT72CZW70M"
   ],
   "pr": 12,
   "parent": null,
   "related": [],
-  "spec": null
+  "spec": null,
+  "closed_at": "2026-11-21T09:41:21.189Z"
 }
