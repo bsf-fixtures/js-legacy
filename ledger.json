@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T08:36:26.765Z",
+  "updated_at": "2026-11-21T08:36:38.552Z",
   "open": [
     {
       "work_item": "wi_01M7Y4H6GSWY2F7HGEA1BGSZGM",
@@ -96,7 +96,8 @@
       "status": "running",
       "priority": "normal",
       "created_at": "2026-11-21T07:45:30.331Z",
-      "fingerprint": "sha256:f137fdd0a90817db900c7aa89bb4e73514b278e2ce81d72a764744d4bd19f624"
+      "fingerprint": "sha256:f137fdd0a90817db900c7aa89bb4e73514b278e2ce81d72a764744d4bd19f624",
+      "pr": 23
     },
     {
       "work_item": "wi_01M7YHFMYF0MHYCEHM31CFM3M9",
