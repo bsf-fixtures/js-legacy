@@ -1,0 +1,23 @@
+{
+  "schema": "work-item/1",
+  "id": "wi_01M7YJRKWSZQH3X68JZB970SB5",
+  "created_at": "2026-11-21T08:15:02.041Z",
+  "source": {
+    "kind": "schedule",
+    "ref": null,
+    "actor": "factory",
+    "via": null
+  },
+  "trigger_class": "scheduled",
+  "pipeline": "gardening",
+  "title": "Gardening: untested behaviour in .",
+  "body": "1 file(s) changed in the last 14 days with no test in the same commit\n\nFiles:\n- eslint.config.mjs",
+  "priority": "normal",
+  "fingerprint": "sha256:3838c0b7387a810600b8196181dbab7e327e9191f10e1ee9d64d2146bb850339",
+  "status": "queued",
+  "runs": [],
+  "pr": null,
+  "parent": null,
+  "related": [],
+  "spec": null
+}

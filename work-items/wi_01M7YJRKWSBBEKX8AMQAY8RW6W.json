@@ -1,0 +1,23 @@
+{
+  "schema": "work-item/1",
+  "id": "wi_01M7YJRKWSBBEKX8AMQAY8RW6W",
+  "created_at": "2026-11-21T08:15:02.041Z",
+  "source": {
+    "kind": "schedule",
+    "ref": null,
+    "actor": "factory",
+    "via": null
+  },
+  "trigger_class": "scheduled",
+  "pipeline": "gardening",
+  "title": "Gardening: untested HTTP behavior (src/handlers.js, src/server.js, src/report.js)",
+  "body": "found by the gardener\n\nFiles:\n- src/handlers.js\n- src/server.js\n- src/report.js",
+  "priority": "normal",
+  "fingerprint": "sha256:082bd1106b0d2dcd9775b3897abf30587e0997d2d01a5692d0035705f03bf4ef",
+  "status": "queued",
+  "runs": [],
+  "pr": null,
+  "parent": null,
+  "related": [],
+  "spec": null
+}

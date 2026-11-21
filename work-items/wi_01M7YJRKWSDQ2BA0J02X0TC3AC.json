@@ -1,0 +1,23 @@
+{
+  "schema": "work-item/1",
+  "id": "wi_01M7YJRKWSDQ2BA0J02X0TC3AC",
+  "created_at": "2026-11-21T08:15:02.041Z",
+  "source": {
+    "kind": "schedule",
+    "ref": null,
+    "actor": "factory",
+    "via": null
+  },
+  "trigger_class": "scheduled",
+  "pipeline": "gardening",
+  "title": "Gardening: one concern, several implementations: money formatting and totalling duplicated (report.js fmt/totals vs util.money/total; db-free inline logic)",
+  "body": "found by the gardener\n\nFiles:\n- src/report.js\n- src/util.js",
+  "priority": "normal",
+  "fingerprint": "sha256:b215849bfb6a04f604e7845d4a1e3781201c01ef349842be3989661018edf4a6",
+  "status": "queued",
+  "runs": [],
+  "pr": null,
+  "parent": null,
+  "related": [],
+  "spec": null
+}
