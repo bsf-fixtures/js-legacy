@@ -1,0 +1,23 @@
+{
+  "schema": "work-item/1",
+  "id": "wi_01M7YKF97HXPVTX11RV9SXNY9G",
+  "created_at": "2026-11-21T08:27:24.785Z",
+  "source": {
+    "kind": "schedule",
+    "ref": null,
+    "actor": "factory",
+    "via": null
+  },
+  "trigger_class": "scheduled",
+  "pipeline": "gardening",
+  "title": "Gardening: untested behaviour in src",
+  "body": "5 file(s) changed in the last 14 days with no test in the same commit\n\nFiles:\n- src/db.js\n- src/handlers.js\n- src/report.js\n- src/server.js\n- src/util.js",
+  "priority": "normal",
+  "fingerprint": "sha256:38da87a13e3c3de9d66d99e92e84a0390ffaf029cb9c28e5937a52abc588b57e",
+  "status": "queued",
+  "runs": [],
+  "pr": null,
+  "parent": null,
+  "related": [],
+  "spec": null
+}
