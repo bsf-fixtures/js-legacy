@@ -6,7 +6,7 @@
     "install": "npm ci",
     "build": null,
     "run": "node src/server.js",
-    "test": null,
+    "test": "npm test --if-present",
     "seed": "for r in \"Widget:3:1250\" \"Gasket:12:499\" \"Flange:1:19999\"; do IFS=: read -r n q p <<< \"$r\"; curl -fsS -o /dev/null -X POST --data-urlencode \"name=$n\" --data-urlencode \"qty=$q\" --data-urlencode \"price=$p\" \"http://127.0.0.1:${PORT:-3000}/add\"; done"
   },
   "app_url": "http://127.0.0.1:3000/",
@@ -15,7 +15,7 @@
       "name": "PORT",
       "kind": "self",
       "value": "3000",
-      "why": "The only variable this app reads. src/server.js:15 is `var port = process.env.PORT || 3000`, and that port is the whole of the app's own origin: there is no base-URL setting, no allowlist and no callback URL anywhere in src/. 3000 is set explicitly rather than left to the default so that app_url and the runbook cannot drift from what the process actually binds."
+      "why": "The only variable this app reads. src/server.js:15 is `var port = process.env.PORT || 3000`, and that port is the whole of the app's own origin: there is no base-URL setting, no allowlist and no callback URL anywhere in src/. 3000 is set explicitly rather than left to the default so that app_url and the runbook cannot drift from what the process actually binds. The test suites now open do not depend on it: every one of them binds an ephemeral port through the `module.exports = app` seam in src/server.js rather than reusing PORT, so the tests gate and a running app cannot collide on 3000."
     }
   ],
   "services": [],
@@ -39,6 +39,16 @@
       "from": "package.json",
       "what": "`npm start` as the run command",
       "why": "Replaced with the equivalent `node src/server.js`. The trial stops the app by signalling the detached process group, and running node directly means there is no npm wrapper process between the signal and the server. `npm start` is kept in the runbook as the command a developer would type; the two run the same file."
+    },
+    {
+      "from": "the amendment report, key 9f1defd34b78058b",
+      "what": "`npm test` exactly as the report worded it",
+      "why": "Set to `npm test --if-present` instead, which is the same command wherever a `test` script exists and differs only where none does. The report's own pull request (#12) is open, not merged, so the default branch still has no `test` script, and factory-setup-trial.yml checks out the branch the workflow runs on. Measured here on the default branch after `npm ci`: bare `npm test` exits 1 with `npm error Missing script: \"test\"`, and `reachedTier` in the runner returns `static` the moment the test step fails, skipping the run and screenshot steps entirely. Taking the report's wording literally would therefore have measured `static` and frozen a worse sandbox than the one already in place, without running anyone's tests. There is no third option: a command that passes on a tree with no test script cannot also fail on one, so `--if-present` is the only wording that is both correct on the default branch today and correct on every pull request that adds a suite."
+    },
+    {
+      "from": "package.json on pull requests #11–#15",
+      "what": "naming the test runner directly, e.g. `node --test` or `node --test --experimental-test-coverage ...`",
+      "why": "Five pull requests that add a first test suite are open at once and they do not agree: #11 and #15 use plain `node --test`, #12 adds a `pretest` hook that creates coverage/, #13 and #14 inline `mkdir -p coverage &&` before the runner; two put tests in test/ and three in tests/; #11 and #15 emit no coverage report at all. The one thing all five share is that `npm test` is how they are run. Driving the suite through npm rather than naming a runner means this manifest does not pick a winner among them and does not need another amendment when a different one merges."
     }
   ],
   "capabilities": {
@@ -52,16 +62,21 @@
       "GET /health: returns the string ok with status 200.",
       "All three money formatters and both totallers, through the pages that call them: util.money and util.total on /, util.money2 on /export, report.fmt and report.totals on /report.",
       "util.esc, through a name rendered into the / table.",
-      "`npm ci` from the committed package-lock.json in the closed environment (PATH, HOME, TMPDIR, LANG, CI plus PORT and nothing else): 159 packages, exit 0.",
-      "`npm run lint` with the repo's own eslint.config.mjs, which the static gate drives."
+      "`npm ci` from the committed package-lock.json: 159 packages, exit 0. Round 1 ran it under `env -i` with only PATH, HOME, TMPDIR, LANG, CI and PORT and it passed; this amendment could not repeat that control, because `env -i` also drops the proxy variables this runner's firewall needs and the install then fails to resolve the registry. The plain `npm ci` was re-run and passed.",
+      "`npm run lint` with the repo's own eslint.config.mjs, which the static gate drives.",
+      "The repo's own test suite, through `npm test --if-present`. Measured against the head of pull request #12, the tree the amendment report came from: after `npm ci`, 31 tests, 0 failures, exit 0, in about 0.3s. The suite adds no dependency — it is node's built-in runner with node:test and node:assert, and it drives the real express app through the `module.exports = app` seam in src/server.js on an ephemeral port. This is the command `bsf gates tests` runs verbatim through bash in the repo root against a pull request's own head commit, where the `test` script exists.",
+      "That the coverage gate can read what that suite writes. `npm test --if-present` on #12's tree produces coverage/lcov.info with one `SF:` record per file under src/, paths already relative (`SF:src/db.js`), which is exactly what `readCoverage` in the runner looks for first after coverage/coverage-summary.json. Reported total 98.04% line coverage: 100% of db.js, handlers.js, report.js and util.js, 82.61% of server.js with lines 18–21 (the `require.main` listen guard) uncovered. factory-gates.yml runs `bsf gates tests` before `bsf gates coverage` in the same job, so the report is on disk by the time the coverage gate reads it.",
+      "That a red test actually reaches the gate rather than being swallowed: a deliberately failing assertion appended to #12's tests/util.test.js made `npm test --if-present` exit 1; restoring the file returned it to exit 0.",
+      "That the command depends on this repo and not on the machine, which is what the trial's empty-directory control step measures: in a directory with no package.json, `npm test --if-present` exits 254 — as does bare `npm test` — so the control step still shows the command testing this repo's code.",
+      "That the command is safe on the default branch as it stands today, before any suite has merged: `npm test --if-present` after `npm ci` exits 0 having run nothing, so the trial's install → test → control → run sequence still reaches the app and measures renders."
     ],
     "not_exercised": [
       {
-        "what": "Automated tests and total coverage",
+        "what": "Total coverage, until a test suite merges",
         "paths": [
           "src/"
         ],
-        "why": "The repo has no test framework, no test files and no test script, so commands.test is null — that is a fact about the repo, not a gap in the sandbox. Until tests exist the tests gate has nothing of the repo's own to run and total coverage stays at the 0% floor in .factory/guardrails/coverage.json. Diff coverage still applies, so the first change to src/ has to bring both its tests and the runner that executes them, and adding that runner is a package.json change that this manifest's install command will pick up without an amendment."
+        "why": "commands.test is now `npm test --if-present`, so the tests gate has a command to run and is no longer blind — but what it runs depends on the branch it runs on. On the default branch today there is still no `test` script and no test file: five pull requests that add one are open at once (#11, #12, #13, #14, #15) and none has merged. There the command exits 0 having run nothing, no coverage report is written, and total coverage stays at the 0% floor in .factory/guardrails/coverage.json, so diff coverage (diff_min_pct: 80) is what has teeth. On a pull request that carries a suite the gate gets the real run, which is what the report asked for. Two consequences worth stating plainly. First, on a branch with no `test` script the tests gate now reports success rather than the neutral it reported when commands.test was null; that is a weaker signal, and it is the price of the trial being able to measure the manifest at all while the suite is unmerged. Second, whether total coverage can ever be measured depends on which pull request lands: #12, #13 and #14 emit coverage/lcov.info and #11 and #15 emit nothing. Once a `test` script is on the default branch, a further amendment should drop `--if-present`, so that deleting the script fails the gate instead of passing it quietly."
       },
       {
         "what": "Anything that has to survive a restart",
@@ -76,7 +91,7 @@
           "src/db.js",
           "src/server.js"
         ],
-        "why": "One node process holding state in its own heap: no cluster mode, no worker pool, no lock and no transaction. Two requests interleaving inside db.add or db.remove cannot be reproduced, and nothing about state shared across processes can be checked."
+        "why": "One node process holding state in its own heap: no cluster mode, no worker pool, no lock and no transaction. Two requests interleaving inside db.add or db.remove cannot be reproduced, and nothing about state shared across processes can be checked. The test suites now open work around the same fact rather than escaping it: src/db.js exposes no reset, so they empty the store through db.remove between tests and may not hardcode an id."
       },
       {
         "what": "HTTPS, a reverse proxy, a non-localhost origin, or any deployment concern",
@@ -96,7 +111,7 @@
       "attempt": 1,
       "tried": "Read the repo before running it: package.json, package-lock.json, README.md, eslint.config.mjs, all five files in src/, the .github/workflows/ directory and .factory/definition/factory.yaml.",
       "observed": "One runtime dependency (express ^4.21.2), one dev dependency (eslint ^9.16.0), two scripts (`start` and `lint`), and `main: src/server.js`. No build step, no test script, no test files, no Dockerfile, no compose file, no devcontainer and no deploy configuration anywhere in the repo. Every workflow under .github/workflows/ belongs to the factory itself, not to the app, so there was no app CI to copy an install or test command from. src/ is flat: server.js wires six express routes to handlers.js and report.js, which both read an in-memory array in db.js and format through util.js.",
-      "changed": "Set commands.build and commands.test to null, since the repo genuinely has neither; recorded the Dockerfile/deploy search as finding nothing rather than leaving it unstated."
+      "changed": "Set commands.build and commands.test to null, since the repo genuinely had neither; recorded the Dockerfile/deploy search as finding nothing rather than leaving it unstated."
     },
     {
       "attempt": 2,
@@ -139,7 +154,59 @@
       "tried": "trial of round 1: install, run",
       "observed": "reached renders, as claimed",
       "changed": null
+    },
+    {
+      "attempt": 9,
+      "tried": "Amendment, report key 9f1defd34b78058b. The report says a pull request adds node --test plus 31 tests over src/ and that `npm test` exits 0 writing coverage/lcov.info at 98.04% line coverage, and asks for commands.test to be set to `npm test`. Before changing anything, checked whether that `test` script is on the default branch, and listed every open pull request rather than assuming the report's was the only one.",
+      "observed": "The default branch is unchanged: package.json still has only `start` and `lint`, and there is no tests/ or test/ directory. Five pull requests each add a first suite and all are open — #11, #12, #13, #14, #15 — and they disagree about almost everything: #11 and #15 run plain `node --test` and emit no coverage; #12 adds a `pretest` hook creating coverage/; #13 and #14 inline `mkdir -p coverage`; two use test/ and three use tests/. Running each candidate identified the report's own: #12 is the tree with exactly 31 tests and 98.04% line coverage. The only thing all five have in common is that `npm test` runs them.",
+      "changed": "Decided to drive the suite through npm rather than name a runner, so the manifest does not pick a winner among the five and does not need a further amendment when a different one merges."
+    },
+    {
+      "attempt": 10,
+      "tried": "Ran the literal command the report asked for — `npm test` — on the default branch as the trial checks it out, after `npm ci`. Then read factory-setup-trial.yml and `reachedTier` in the runner to see what a failing test step costs.",
+      "observed": "Exit 1: `npm error Missing script: \"test\"`. factory-setup-trial.yml uses actions/checkout@v4 with no ref, so the trial measures the default branch, where the report's pull request has not merged. `reachedTier` returns `static` as soon as the test step fails, and the run and screenshot steps are guarded on every prior step being ok, so they would be skipped. The report's literal wording would have measured `static`, frozen a sandbox worse than the one already in place, and still not have run anyone's tests.",
+      "changed": "Did not set commands.test to bare `npm test`. Went looking for a command with the same meaning for the gates that the trial can also measure."
+    },
+    {
+      "attempt": 11,
+      "tried": "Measured `npm test --if-present` in the four places that decide whether it is honest: pull request #12's tree after `npm ci`; that tree with a deliberately failing assertion appended to tests/util.test.js; the default branch as it stands; and a directory with no package.json, which is what the trial's control step uses. Then read `runTestsGate` and `readCoverage` in the runner, and the step order in factory-gates.yml, to check the gates consume it the way the report needs.",
+      "observed": "On #12's tree: 31 tests, 0 failures, exit 0, and coverage/lcov.info written with `SF:src/db.js`-style relative paths and 98.04% total line coverage — matching the report exactly. With one failing assertion added: exit 1, so a red test is not swallowed; restoring the file returned it to exit 0. On the default branch: exit 0, nothing run, no coverage written. In the empty directory: exit 254, and bare `npm test` is 254 there too, so the control step still shows the command depends on this repo. `bsf gates tests` runs commands.test verbatim through bash in the repo root against the pull request's own head commit, where the script exists; `bsf gates coverage` runs after it in the same job and reads coverage/lcov.info from the root, which is the file that run has just written. Noted the one cost: where no `test` script exists the gate now reports success rather than neutral.",
+      "changed": "Set commands.test to `npm test --if-present`, recorded under `dropped` why it is not the report's literal wording and why no third option exists, and recorded under capabilities.not_exercised both the weakened signal on a scriptless branch and the recommendation to tighten to plain `npm test` once a suite is on the default branch."
+    },
+    {
+      "attempt": 12,
+      "tried": "Re-ran everything else in the manifest unchanged, to check the amendment costs nothing elsewhere: `npm ci`, `node src/server.js`, all six routes with curl, the seed command, and Chromium via the Playwright CLI against http://127.0.0.1:3000/ — snapshot, form submission and a full-page screenshot.",
+      "observed": "`npm ci` exit 0. The server logged `listening on 3000` and /health returned `ok`. The seed added three items and /report then showed lines 3, units 16, value $297.37, matching the runbook. /export returned the CSV with both headers. The accessibility snapshot shows the Stock heading, the four-column table with a delete link per row, `total: $297.37`, the three form fields and the export link; filling Bolt / 5 / 275 and clicking add took the total to $311.12, which is qty × price. The screenshot was taken. The only console entry is the expected 404 for /favicon.ico. Still renders.",
+      "changed": null
+    },
+    {
+      "attempt": 13,
+      "tried": "Checked whether another amendment was already in flight before proposing this one, by listing the open pull requests rather than only reading amend.json.",
+      "observed": "Pull request #19, `Amend the factory's sandbox`, is open and unmerged on branch factory/setup-44882898522. It answers a different report — key 002d0ba19faa9525 — and reaches the same conclusion from the same measurements: commands.test set to `npm test --if-present`, with the trial's `static` outcome for bare `npm test` recorded as the reason. Since it has not merged, the default branch this amendment starts from still has commands.test: null, so this manifest carries that change rather than assuming it.",
+      "changed": "Listed both report keys in amended_by, newest last, because this single manifest now covers both reports: whichever of the two pull requests merges second supersedes the first with an identical commands.test and a complete record of why."
+    },
+    {
+      "attempt": 14,
+      "tried": "The report asks for two things — commands.test here, and the `## Test` section of .factory/definition/context/runbook.md, which still says \"This repo has no tests.\" Rewrote that section, plus the rows in feature-map.md, fundamentals.md and history.md that rest on the same premise. Then read factory-setup.yml to check how those files reach the repo on an amendment round.",
+      "observed": "They do not. The step that opens the setup pull request copies the context only when the amend input is empty: `if [ -z \"$AMEND\" ] && [ -d \"$design/context\" ]`, with the comment \"An amendment changes the sandbox only; the context stays the user's once it has been merged.\" research-domains.txt and stubs/ are copied unconditionally, but the four context files are not. So an amendment episode structurally cannot deliver the half of this report that is about runbook.md.",
+      "changed": "Wrote the corrected context files into the round's artifact anyway, so the text exists and is reviewable, and raised the gap in the run's report issue with the replacement text quoted, since applying it needs either a hand-edit or a non-amendment setup round. Nothing in the manifest changed as a result."
+    },
+    {
+      "attempt": 15,
+      "tried": "Validated the amended manifest with `.factory/bin/bsf sandbox check --file /tmp/gh-aw/agent/bsf/setup/manifest.json`.",
+      "observed": "Valid, tier renders.",
+      "changed": null
+    },
+    {
+      "attempt": 16,
+      "tried": "trial of round 1: install, test, control, run",
+      "observed": "reached renders, as claimed",
+      "changed": null
     }
   ],
-  "frozen_at": "2026-11-21T04:45:08.577Z"
+  "amended_by": [
+    "002d0ba19faa9525",
+    "9f1defd34b78058b"
+  ],
+  "frozen_at": "2026-11-21T08:39:22.515Z"
 }

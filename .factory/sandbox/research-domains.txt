@@ -12,8 +12,13 @@
 expressjs.com
 
 # node.js — CommonJS module resolution, process.env, require.main, and the
-# built-in test runner, which is the most likely way tests arrive in a repo
-# with one dependency and no test framework.
+# built-in test runner. The runner is no longer a guess: every open pull
+# request that adds a first test suite uses `node --test` with node:test and
+# node:assert and adds no dependency, and three of them use
+# --experimental-test-coverage with the lcov reporter to write
+# coverage/lcov.info, which is the file the coverage gate reads. The
+# test-runner, assert and test-coverage pages are load-bearing docs now, not
+# speculative ones.
 nodejs.org
 
 # eslint 9 — flat config (eslint.config.mjs) and the rule reference. The
