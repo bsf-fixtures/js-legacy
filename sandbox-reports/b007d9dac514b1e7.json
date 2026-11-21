@@ -1,0 +1,13 @@
+{
+  "role": "builder",
+  "needs": "commands.test set to `npm test`, so the tests gate runs this repo's tests and the coverage gate has a report to read",
+  "paths": [
+    "package.json",
+    "test/report.test.js",
+    ".factory/sandbox/manifest.json"
+  ],
+  "why": "The manifest records commands.test as null and lists \"Automated tests and total coverage\" (paths: src/) under capabilities.not_exercised, because until now the repo had no test runner. This PR adds one: package.json gains a `test` script that runs Node's built-in test runner (no new dependency) and writes coverage/lcov.info, which is one of the three paths `bsf gates coverage` reads. I cannot set commands.test myself — .factory/sandbox/** is protected by policy.yaml — so the gates still see commands.test as null: `bsf gates tests` returns neutral (\"no test command\"), nothing writes coverage/lcov.info in the gate job, and `bsf gates coverage` finds no report. The tests therefore pass here and are invisible to the factory. Verified locally: `npm test` runs 7 tests, all pass, exit 0, and reports src/report.js at 100% line coverage. One caveat the amendment should weigh before the coverage ratchet engages: Node's V8-based coverage only reports modules the tests actually load, so the current report covers src/db.js, src/report.js and src/util.js and omits src/handlers.js and src/server.js entirely. Total coverage therefore measures 71.15%, which is coverage of three files rather than of src/. Once commands.test is set, checkCoverage would ratchet floor_pct to ~70% off that partial number, and the next gardening PR that adds tests loading handlers.js and server.js would pull the measured total down and fail the floor it never really met. Setting commands.test and leaving diff coverage as the check with teeth until src/ is loaded in full is the safer order.",
+  "work_item": "wi_01M7YGYNWVV39K31B4V2SQ0AFX",
+  "reported_at": "2026-11-21T08:24:22.926Z",
+  "reports": 1
+}
