@@ -1,0 +1,13 @@
+{
+  "role": "verifier",
+  "needs": "commands.test set to \"npm test\" in .factory/sandbox/manifest.json, and the now-untrue capabilities.not_exercised entry \"Automated tests and total coverage\" removed",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    "package.json",
+    "tests/"
+  ],
+  "why": "The repo now has a test runner and 48 passing tests, but commands.test is still null and the manifest is protected, so the builder could not wire it up. I confirmed the consequence by running the gates directly: `bsf gates tests` reports `tests_source=no_tests` (\"This repo has no test command, so there was nothing to run\") even though `npm test` passes 48/48 and exits 0. `bsf gates coverage` reads coverage/lcov.info and reports total 98% only because I had run `npm test` by hand first; nothing in the pipeline generates that file, so in a clean run the coverage gate has no report to read. I verified the suite directly instead of through the gates: run, determinism, per-file isolation, exit-code propagation and 16 mutations of src/, all caught. Setting commands.test to \"npm test\" makes both gates see this suite.",
+  "work_item": "wi_01M7YGYNWV7PWW4ANARRCZTC5N",
+  "reported_at": "2026-11-21T08:23:07.021Z",
+  "reports": 1
+}
