@@ -1,0 +1,16 @@
+{
+  "role": "builder",
+  "needs": "commands.test in .factory/sandbox/manifest.json set to \"npm test\", so the tests gate runs the suite this PR adds instead of returning \"no test command\".",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    "package.json",
+    "tests/handlers.test.js",
+    "tests/report.test.js",
+    "tests/server.test.js",
+    "tests/helpers/app.js"
+  ],
+  "why": "The manifest records commands.test as null and lists \"Automated tests and total coverage\" under capabilities.not_exercised, because the repo had no runner. This PR adds one: package.json now has a test script (`node --test \"tests/**/*.test.js\"`, node's built-in runner, no new dependency) and 25 HTTP tests over src/handlers.js, src/server.js and src/report.js. I ran them here and they pass, but bsf gates tests reads commands.test from the manifest, and .factory/sandbox/** is a protected path this pipeline may not change, so the gate still reports neutral/no_tests and the suite is not enforced until the manifest is amended. No new service, credential or stub is needed: the tests start the exported express app on an ephemeral port in-process, and npm ci already installs everything they use.",
+  "work_item": "wi_01M7YJRKWSBBEKX8AMQAY8RW6W",
+  "reported_at": "2026-11-21T08:46:00.823Z",
+  "reports": 1
+}
