@@ -9,30 +9,82 @@
   {{PLACEHOLDERS}} are filled in by setup.
 -->
 
-# Feature map — {{REPO_NAME}}
+# Feature map — js-legacy
 
-{{ONE_LINE_WHAT_THIS_REPO_IS}}
+A single-process stock tracker: an express server that keeps a list of items
+in memory and renders it as server-built HTML, with a report page and a CSV
+export. Five files, 204 lines, one runtime dependency.
 
 ## Feature folders
 
+**This repo has no feature folders.** `src/` is flat — five files, no
+subdirectories anywhere under it. The rows below name those files, because
+they are the units the code is actually divided into, and an agent asking
+"where would this change go?" needs the honest answer rather than a structure
+nobody has built yet.
+
 | Folder | Owns | Depends on |
 | --- | --- | --- |
-{{FEATURE_FOLDER_ROWS}}
+| `src/server.js` | The express app and the route table: the six URLs that exist (`/`, `POST /add`, `/delete`, `/export`, `/report`, `/health`), the `express.urlencoded` body parser, reading `PORT`, and the `require.main === module` guard that lets the app be imported without listening. A new route is wired here. | `express`, `src/handlers.js`, `src/report.js` |
+| `src/handlers.js` | Five of the six request handlers: `index` (the stock table, the total and the add form), `add`, `del`, `exportCsv` and `health`. Builds HTML and CSV by string concatenation and sends it. All input parsing and validation lives here. | `src/db.js`, `src/util.js` |
+| `src/report.js` | The `/report` page only: its own totaller (`totals`), its own money formatter (`fmt`) and its renderer. Exports `totals` as well as `render`, though nothing else currently imports it. | `src/db.js` |
+| `src/db.js` | The entire data store: a module-level `items` array and a `nextId` counter, behind `all`, `add`, `find`, `remove`. Owns item shape (`id`, `name`, `qty`, `price`, `created`) and id allocation. Nothing else touches the array. | nothing |
+| `src/util.js` | Shared helpers: `money`, `money2`, `total`, `esc`, `pad`. | nothing |
+
+The import graph is a clean layering with one gap: `server.js` → {`handlers.js`,
+`report.js`} → {`db.js`, `util.js`}, and `db.js` and `util.js` import nothing.
+`report.js` does not use `util.js`, which is why it grew its own copies of
+`money` and `total`.
+
+`util.pad` is exported and called from nowhere.
 
 ## Shared
 
 | Folder | What it is | Rule |
 | --- | --- | --- |
-{{SHARED_FOLDER_ROWS}}
+| `src/util.js` | The only shared module. Pure functions over values: money formatting (`money` → `"$12.50"`, `money2` → `"12.50"` for the CSV), `total(list)` summing `qty × price`, `esc(s)` escaping `&`, `<` and `>` for HTML, and `pad(n)` zero-padding to two digits. | Pure functions only — no `require` of any other file in `src/`, no I/O, no `req`/`res`. Anything needing the store belongs in `src/db.js`; anything needing a request belongs with its handler. |
+| `src/db.js` | Shared by both feature files, but it is the store rather than a helper. | Every read and write of the item list goes through `all`/`add`/`find`/`remove`. Nothing outside this file touches `items` or `nextId`. |
+
+There is no `src/shared/` directory, and no directory of any kind under
+`src/`.
 
 ## Where things go
 
-- **A new feature** gets its own folder under {{FEATURE_ROOT}}.
-- **Something used by two features** moves to {{SHARED_ROOT}}, and not before
+- **A new feature** gets its own folder under `src/`. Nothing in this repo
+  does that yet — every file sits directly in `src/` — so the first feature
+  folder is a new convention rather than a pattern to copy. Wire its routes in
+  `src/server.js`, which is the only file that knows the URL table.
+- **Something used by two features** moves to `src/util.js`, and not before
   the second use. One caller is not a shared concern.
 - **Nothing in a feature folder imports from another feature folder.** Where
-  two features need the same thing, it belongs in shared.
+  two features need the same thing, it belongs in shared. This already holds:
+  `handlers.js` and `report.js` do not import each other. It holds at the
+  price of duplication — `report.js` reimplements `util.money` as `fmt` and
+  `util.total` as part of `totals` rather than importing them. That is the
+  wrong resolution: both belong in `src/util.js`, and `report.js` should
+  import them.
 
 ## Not in this repo
 
-{{OUT_OF_SCOPE}}
+- **Any test of any kind.** No framework, no test files, no `test` script.
+- **A build step.** No bundler, transpiler, type checker or generated output;
+  node runs `src/` directly.
+- **A database or any persistence.** `src/db.js` is an in-memory array; its
+  own first comment says a real database was intended and never arrived.
+  Nothing is written to disk.
+- **Any outbound network call, SDK or third-party integration.** `express` is
+  the only runtime dependency.
+- **Authentication, authorization, sessions, cookies or users.** Every route
+  is public and anonymous.
+- **Client-side JavaScript, CSS or static assets.** Every page is a string
+  built on the server; there is no `public/`, no asset route, and the browser's
+  404 for `/favicon.ico` is the visible consequence.
+- **A template engine.** HTML is concatenated inside the handlers.
+- **Types.** Plain CommonJS JavaScript, no TypeScript, no JSDoc annotations.
+- **Any deployment or container configuration.** No Dockerfile, compose file,
+  devcontainer, Procfile or deploy script.
+- **App CI.** Every workflow in `.github/workflows/` belongs to the factory.
+- **Error handling beyond two inline 400s.** No error middleware, no 404
+  handler, no logging beyond the one startup `console.log`.
+- **Configuration.** One environment variable, `PORT`. No config file, no
+  settings module, no `.env` loader.

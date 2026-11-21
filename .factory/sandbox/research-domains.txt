@@ -1,0 +1,27 @@
+# Documentation hosts for the stack this repo actually uses. One host per
+# line; blank lines and # comments are ignored by `bsf recompile prepare`,
+# which adds these to the spec role's network allowlist.
+#
+# The list is short because the stack is: express is the single runtime
+# dependency, eslint the single dev dependency, and everything else is node
+# itself and the web platform. Nothing was added speculatively.
+
+# express 4.x — the router, express.urlencoded, res.send/redirect/status and
+# the response headers set in src/handlers.js. src/server.js is almost
+# entirely express API.
+expressjs.com
+
+# node.js — CommonJS module resolution, process.env, require.main, and the
+# built-in test runner, which is the most likely way tests arrive in a repo
+# with one dependency and no test framework.
+nodejs.org
+
+# eslint 9 — flat config (eslint.config.mjs) and the rule reference. The
+# static gate drives eslint, and gardening clears its baselines, so the spec
+# role needs the rule documentation to reason about either.
+eslint.org
+
+# MDN — HTML form semantics, HTTP status and header semantics, and the
+# JavaScript standard library. Every page here is hand-built HTML and the
+# repo has no framework docs to answer those questions instead.
+developer.mozilla.org
