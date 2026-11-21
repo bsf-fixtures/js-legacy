@@ -1,0 +1,15 @@
+{
+  "role": "verifier",
+  "needs": "commands.test set in the manifest so the tests gate runs the repo's new suite. This change adds a `test` script to package.json (`node --test`) and a first test file (test/util.test.js), but the frozen manifest still records commands.test as null, so the tests gate has nothing wired to run and total coverage stays pinned at the 0% floor in .factory/guardrails/coverage.json. I ran `npm test` by hand in the sandbox and all 6 tests passed, so the suite works; what is missing is the manifest entry that makes the gate execute it rather than me.",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    "package.json",
+    "test/util.test.js",
+    ".factory/guardrails/coverage.json",
+    ".factory/definition/context/runbook.md"
+  ],
+  "why": "The manifest was frozen at 2026-11-21T04:45:08.577Z, when the repo genuinely had no test runner, and it lists this under capabilities.not_exercised (\"Automated tests and total coverage\"). Both the manifest and the runbook's ## Test section anticipate exactly this moment: the runbook says \"whoever adds it should also set commands.test through an amendment so the gate stops being blind.\" `npm ci` already picks the script up with no amendment, so only the commands.test field (and the runbook's ## Test section, which still reads \"This repo has no tests\") needs updating. This does not affect my verdict on the app's behaviour, which I verified by running it.",
+  "work_item": "wi_01M7YH2HPVHHGWTCXTPGC5HTQ2",
+  "reported_at": "2026-11-21T08:54:03.050Z",
+  "reports": 1
+}
