@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T07:43:41.699Z",
+  "updated_at": "2026-11-21T07:43:46.302Z",
   "open": [
     {
       "work_item": "wi_01M7Y4H6GSWY2F7HGEA1BGSZGM",
@@ -61,7 +61,7 @@
     {
       "work_item": "wi_01M7YGYNWVCDVT90GGKS6D50KB",
       "pipeline": "gardening",
-      "status": "queued",
+      "status": "running",
       "fingerprint": "sha256:ef76e8554292e0e93788f3527346be38a9164d7120d9f244dee9225e6150c237",
       "priority": "normal",
       "created_at": "2026-11-21T07:43:23.547Z",
