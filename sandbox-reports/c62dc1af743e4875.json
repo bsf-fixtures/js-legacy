@@ -1,0 +1,14 @@
+{
+  "role": "builder",
+  "needs": "commands.test set to `npm test` in .factory/sandbox/manifest.json, and the \"Automated tests and total coverage\" entry removed from capabilities.not_exercised. This PR adds the test runner the manifest said did not exist: `npm test` is `node --test` with Node's built-in coverage, it needs no new dependency and no service, and it writes coverage/lcov.info, which is one of the three paths `bsf gates coverage` already reads. Until the manifest names it, `bsf gates tests` runs nothing and the coverage gate finds no report, so these 35 tests are invisible to both gates and total coverage stays pinned at the 0% floor.",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    "package.json",
+    "test/util.test.js",
+    "test/db.test.js"
+  ],
+  "why": ".factory/sandbox/** is protected by .factory/definition/policy.yaml, so a gardening PR cannot set commands.test itself; the runbook and history.md both predicted this exact handover (\"whoever adds it should also set commands.test through an amendment\"). Everything else was exercised here: `npm ci`, `npm test` (35 passing, 100% line/branch/function coverage of src/util.js and src/db.js), `npm run lint` (clean), and `node src/server.js` still boots and serves / and /health. Nothing outside the sandbox was needed - these are pure helpers and an in-process array.",
+  "work_item": "wi_01M7YJRKWS7V0XBP8ZG8HFTG33",
+  "reported_at": "2026-11-21T08:46:12.157Z",
+  "reports": 1
+}
