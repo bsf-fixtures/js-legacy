@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T10:07:18.309Z",
+  "updated_at": "2026-11-21T13:55:13.637Z",
   "open": [
     {
       "work_item": "wi_01M7Y4H6GSWY2F7HGEA1BGSZGM",
@@ -46,6 +46,17 @@
       "priority": "normal",
       "created_at": "2026-11-21T09:43:54Z",
       "source_ref": "#19"
+    },
+    {
+      "work_item": "wi_01M7Z67H35ZKN03B2NQWNQ3SWW",
+      "pipeline": "gardening",
+      "status": "queued",
+      "fingerprint": "sha256:f7e884582e1ac8122733b30c853c1563b76deb17216657060851d4e159a99a2b",
+      "priority": "normal",
+      "created_at": "2026-11-21T13:55:13.637Z",
+      "fixes": [
+        "no test runner; untested behaviour in src"
+      ]
     }
   ],
   "recent": [

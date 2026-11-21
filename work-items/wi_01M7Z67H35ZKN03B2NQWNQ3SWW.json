@@ -1,0 +1,23 @@
+{
+  "schema": "work-item/1",
+  "id": "wi_01M7Z67H35ZKN03B2NQWNQ3SWW",
+  "created_at": "2026-11-21T13:55:13.637Z",
+  "source": {
+    "kind": "schedule",
+    "ref": null,
+    "actor": "factory",
+    "via": null
+  },
+  "trigger_class": "scheduled",
+  "pipeline": "gardening",
+  "title": "Gardening: no test runner; untested behaviour in src",
+  "body": "found by the gardener\n\nFiles:\n- package.json\n- test/util.test.js",
+  "priority": "normal",
+  "fingerprint": "sha256:f7e884582e1ac8122733b30c853c1563b76deb17216657060851d4e159a99a2b",
+  "status": "queued",
+  "runs": [],
+  "pr": null,
+  "parent": null,
+  "related": [],
+  "spec": null
+}
