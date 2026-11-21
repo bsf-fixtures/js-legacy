@@ -1,0 +1,10 @@
+{
+  "schema": "live/1",
+  "run": "run_01M7YM1JMV954EA99V6WJYN869",
+  "work_item": "wi_01M7YKF97HXPVTX11RV9SXNY9G",
+  "pipeline": "gardening",
+  "step": "gardener",
+  "attempt": 1,
+  "started_at": "2026-11-21T08:37:24.251Z",
+  "actions_run": 44885686477
+}
