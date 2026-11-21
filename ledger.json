@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T07:43:50.358Z",
+  "updated_at": "2026-11-21T07:45:30.331Z",
   "open": [
     {
       "work_item": "wi_01M7Y4H6GSWY2F7HGEA1BGSZGM",
@@ -89,6 +89,28 @@
       "created_at": "2026-11-21T07:43:23.547Z",
       "fixes": [
         "untested report page (src/report.js)"
+      ]
+    },
+    {
+      "work_item": "wi_01M7YH2HPVH3YCXTH7H08G7S0C",
+      "pipeline": "gardening",
+      "status": "queued",
+      "fingerprint": "sha256:413f471c10863e49c3996b337cfa864acfb310286250a263414c177165f21ee0",
+      "priority": "normal",
+      "created_at": "2026-11-21T07:45:30.331Z",
+      "fixes": [
+        "one concern, one implementation: money formatting and order totalling"
+      ]
+    },
+    {
+      "work_item": "wi_01M7YH2HPVHHGWTCXTPGC5HTQ2",
+      "pipeline": "gardening",
+      "status": "queued",
+      "fingerprint": "sha256:f137fdd0a90817db900c7aa89bb4e73514b278e2ce81d72a764744d4bd19f624",
+      "priority": "normal",
+      "created_at": "2026-11-21T07:45:30.331Z",
+      "fixes": [
+        "dead code"
       ]
     }
   ],

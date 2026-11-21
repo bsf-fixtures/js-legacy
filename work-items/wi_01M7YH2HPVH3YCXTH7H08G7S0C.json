@@ -1,0 +1,23 @@
+{
+  "schema": "work-item/1",
+  "id": "wi_01M7YH2HPVH3YCXTH7H08G7S0C",
+  "created_at": "2026-11-21T07:45:30.331Z",
+  "source": {
+    "kind": "schedule",
+    "ref": null,
+    "actor": "factory",
+    "via": null
+  },
+  "trigger_class": "scheduled",
+  "pipeline": "gardening",
+  "title": "Gardening: one concern, one implementation: money formatting and order totalling",
+  "body": "found by the gardener\n\nFiles:\n- src/report.js",
+  "priority": "normal",
+  "fingerprint": "sha256:413f471c10863e49c3996b337cfa864acfb310286250a263414c177165f21ee0",
+  "status": "queued",
+  "runs": [],
+  "pr": null,
+  "parent": null,
+  "related": [],
+  "spec": null
+}
