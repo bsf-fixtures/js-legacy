@@ -4,9 +4,11 @@
 #
 # The list is short because the stack is short: express is the single runtime
 # dependency, eslint the single dev dependency, and everything else is node
-# itself and the web platform. package.json names nothing else, and src/
-# requires nothing but express and its own four files. Nothing was added
-# speculatively.
+# itself and the web platform. package.json names nothing else, src/ requires
+# nothing but express and its own four files, and tests/ requires nothing but
+# node:test, node:assert, node:net, node:path, node:child_process and the
+# files under test. Nothing was added speculatively, and this amendment added
+# no host — the repo's first test suite introduced no dependency.
 
 # express 4.x — the router, express.urlencoded, res.send/redirect/status and
 # the response headers set in src/handlers.js. src/server.js is almost
@@ -14,17 +16,22 @@
 expressjs.com
 
 # node.js — CommonJS module resolution, process.env, require.main, and the
-# built-in test runner (node:test), which is the most likely way tests arrive
-# in a repo with one dependency and no test framework.
+# built-in test runner. node:test and node:assert are now what the repo's 52
+# tests are written against, and `node --test --experimental-test-coverage`
+# with the lcov reporter is what commands.coverage runs, so the test-runner
+# and coverage pages of the node docs are load-bearing rather than
+# anticipatory.
 nodejs.org
 
 # eslint 9 — flat config (eslint.config.mjs) and the rule reference. The
-# static gate drives eslint, this round turned 8 rules on, and gardening
-# clears their baselines, so the spec role needs the rule documentation to
-# reason about either.
+# static gate drives eslint, setup turned 8 rules on, and gardening clears
+# their baselines, so the spec role needs the rule documentation to reason
+# about either. Note the config is scoped to src/**/*.js, so tests/ is
+# currently outside it.
 eslint.org
 
-# MDN — HTML form semantics, HTTP status and header semantics, and the
-# JavaScript standard library. Every page here is hand-built HTML and the
-# repo has no framework docs to answer those questions instead.
+# MDN — HTML form semantics, HTTP status and header semantics, fetch (which
+# the tests use directly), and the JavaScript standard library. Every page
+# here is hand-built HTML and the repo has no framework docs to answer those
+# questions instead.
 developer.mozilla.org
