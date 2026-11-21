@@ -1,0 +1,13 @@
+{
+  "role": "builder",
+  "needs": "commands.test in .factory/sandbox/manifest.json set to \"npm test\" (node's built-in runner, now wired up in package.json), so the tests gate runs the repo's own suite instead of having nothing to run. capabilities.not_exercised's \"Automated tests and total coverage\" entry is now out of date: src/util.js is covered at 100% line, branch and function by test/util.test.js.",
+  "paths": [
+    "package.json",
+    "test/util.test.js",
+    ".factory/sandbox/manifest.json"
+  ],
+  "why": ".factory/sandbox/** is protected by .factory/definition/policy.yaml and the gardening pipeline may only change code and tests, so this PR cannot set commands.test itself. The manifest still records commands.test as null, which was true when it was frozen and is no longer true. This is the amendment history.md predicted would be needed the first time a runner arrived: without it the tests gate stays blind to a suite that exists and passes. No service, credential or stub is missing — `npm test` runs to completion in this sandbox under the environment the manifest already supplies (verified: 13 tests, 0 failures), and `npx eslint .` still exits 0.",
+  "work_item": "wi_01M7Z67H35ZKN03B2NQWNQ3SWW",
+  "reported_at": "2026-11-21T14:02:05.506Z",
+  "reports": 1
+}
