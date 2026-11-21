@@ -28,11 +28,4 @@ function esc(s) {
   return s;
 }
 
-function pad(n) {
-  if (n < 10) {
-    return "0" + n;
-  }
-  return "" + n;
-}
-
-module.exports = { money: money, money2: money2, total: total, esc: esc, pad: pad };
+module.exports = { money: money, money2: money2, total: total, esc: esc };
