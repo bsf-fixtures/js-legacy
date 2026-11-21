@@ -13,15 +13,6 @@ function add(name, qty, price) {
   return it;
 }
 
-function find(id) {
-  for (var i = 0; i < items.length; i++) {
-    if (items[i].id == id) {
-      return items[i];
-    }
-  }
-  return null;
-}
-
 function remove(id) {
   var out = [];
   for (var i = 0; i < items.length; i++) {
@@ -32,4 +23,4 @@ function remove(id) {
   items = out;
 }
 
-module.exports = { all: all, add: add, find: find, remove: remove };
+module.exports = { all: all, add: add, remove: remove };
