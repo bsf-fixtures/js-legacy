@@ -14,7 +14,7 @@
   "body": "found by the gardener\n\nFiles:\n- src/report.js\n- test/report.test.js",
   "priority": "normal",
   "fingerprint": "sha256:dbaa195067b40967e1e89d69296af0428d6a38ae5d61ee165fffcd0d627cb70a",
-  "status": "running",
+  "status": "in_review",
   "runs": [
     "run_01M7YJJH769HZA1YF82K3S6CX5"
   ],

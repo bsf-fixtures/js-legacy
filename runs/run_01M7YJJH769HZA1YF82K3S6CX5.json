@@ -1,0 +1,32 @@
+{
+  "schema": "run/1",
+  "id": "run_01M7YJJH769HZA1YF82K3S6CX5",
+  "work_item": "wi_01M7YGYNWVV39K31B4V2SQ0AFX",
+  "pipeline": "gardening",
+  "actor": {
+    "kind": "agent",
+    "harness": "claude-code"
+  },
+  "started_at": "2026-11-21T08:11:42.694Z",
+  "ended_at": "2026-11-21T08:49:15.188Z",
+  "duration_sec": 2252,
+  "outcome": "draft_pr",
+  "pr": 20,
+  "steps": [],
+  "gates": [
+    {
+      "gate": "static",
+      "attempt": 1,
+      "result": "pass",
+      "commit": "e1f795b200d6e1097dc4c2cd2878d7ca2d582aa5"
+    },
+    {
+      "gate": "verification",
+      "attempt": 1,
+      "result": "pass",
+      "commit": "e1f795b200d6e1097dc4c2cd2878d7ca2d582aa5"
+    }
+  ],
+  "cost_usd": 0,
+  "escalated": false
+}
