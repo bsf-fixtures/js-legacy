@@ -1,0 +1,23 @@
+{
+  "schema": "work-item/1",
+  "id": "wi_01M7YGYNWVV39K31B4V2SQ0AFX",
+  "created_at": "2026-11-21T07:43:23.547Z",
+  "source": {
+    "kind": "schedule",
+    "ref": null,
+    "actor": "factory",
+    "via": null
+  },
+  "trigger_class": "scheduled",
+  "pipeline": "gardening",
+  "title": "Gardening: untested report page (src/report.js)",
+  "body": "found by the gardener\n\nFiles:\n- src/report.js\n- test/report.test.js",
+  "priority": "normal",
+  "fingerprint": "sha256:dbaa195067b40967e1e89d69296af0428d6a38ae5d61ee165fffcd0d627cb70a",
+  "status": "queued",
+  "runs": [],
+  "pr": null,
+  "parent": null,
+  "related": [],
+  "spec": null
+}
