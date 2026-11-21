@@ -6,7 +6,7 @@
     "install": "npm ci",
     "build": null,
     "run": "node src/server.js",
-    "test": null,
+    "test": "npm test --if-present",
     "seed": "for r in \"Widget:3:1250\" \"Gasket:12:499\" \"Flange:1:19999\"; do IFS=: read -r n q p <<< \"$r\"; curl -fsS -o /dev/null -X POST --data-urlencode \"name=$n\" --data-urlencode \"qty=$q\" --data-urlencode \"price=$p\" \"http://127.0.0.1:${PORT:-3000}/add\"; done"
   },
   "app_url": "http://127.0.0.1:3000/",
@@ -28,7 +28,7 @@
     {
       "from": "package.json",
       "what": "the `lint` script (`eslint src`)",
-      "why": "Linting is the static gate's job: `bsf gates static` runs the repo's own linter and compares each rule's per-file count against .factory/guardrails/baselines.json. Putting it in `build` or `test` would make a baselined lint violation fail the trial as a build error and would count the same finding twice. It is still runnable in the sandbox — `npm run lint` works once `npm ci` has run — it is just not in the build path."
+      "why": "Linting is the static gate's job: `bsf gates static` runs the repo's own linter and compares each rule's per-file count against .factory/guardrails/baselines.json. Putting it in `build` or `test` would make a baselined lint violation fail the trial as a build error and would count the same finding twice. It is still runnable in the sandbox — `npm run lint` works once `npm ci` has run, and was run here (exit 0) — it is just not in the build path."
     },
     {
       "from": "README.md",
@@ -39,10 +39,17 @@
       "from": "package.json",
       "what": "`npm start` as the run command",
       "why": "Replaced with the equivalent `node src/server.js`. The trial stops the app by signalling the detached process group, and running node directly means there is no npm wrapper process between the signal and the server. `npm start` is kept in the runbook as the command a developer would type; the two run the same file."
+    },
+    {
+      "from": "README.md",
+      "what": "the \"Test / There are none. That is the point.\" section",
+      "why": "True when it was written and no longer the instruction to follow. commands.test is now `npm test --if-present`, which runs the repo's own `test` script the moment one exists. The README is not updated here because setup may not keep changes to the repo; the runbook carries the current answer."
     }
   ],
   "capabilities": {
     "exercised": [
+      "The repo's own test suite, through `npm test --if-present`. This is the amendment: the tests gate runs `commands.test` verbatim in the pull request's checkout, so on any branch whose package.json defines a `test` script the gate now runs it and reports a real pass or fail instead of the neutral \"this repo has no test command\" verdict.",
+      "Exit-code fidelity of that command, which is the whole of what the gate reads. Verified against a scratch copy of this repo carrying the shape the amendment report describes (a `test` script running node's built-in runner, plus test/util.test.js over src/util.js): three passing tests gave exit 0, and adding one deliberately failing assertion gave exit 1.",
       "GET / in a real browser: the Stock heading, the bordered table, one row per item with the price formatted as dollars, the running total, the add form and the export link. Verified with Playwright against the running app, including a full-page screenshot.",
       "POST /add through the browser form: filling name, qty and price in cents and clicking add redirects back to / with a new row and an updated total.",
       "POST /add over HTTP, including the two fallbacks in src/handlers.js (a non-numeric qty becomes 1, a non-numeric price becomes 0) and the 400 when name is missing.",
@@ -52,16 +59,24 @@
       "GET /health: returns the string ok with status 200.",
       "All three money formatters and both totallers, through the pages that call them: util.money and util.total on /, util.money2 on /export, report.fmt and report.totals on /report.",
       "util.esc, through a name rendered into the / table.",
-      "`npm ci` from the committed package-lock.json in the closed environment (PATH, HOME, TMPDIR, LANG, CI plus PORT and nothing else): 159 packages, exit 0.",
-      "`npm run lint` with the repo's own eslint.config.mjs, which the static gate drives."
+      "`npm ci` from the committed package-lock.json in the closed environment (PATH, HOME, TMPDIR, LANG, CI, RUNNER_TEMP plus PORT and nothing else): exit 0 and 0 vulnerabilities, installing the 159 packages package-lock.json pins (139 top-level entries under node_modules, because scoped packages nest one level down).",
+      "`npm run lint` with the repo's own eslint.config.mjs, which the static gate drives: exit 0."
     ],
     "not_exercised": [
       {
-        "what": "Automated tests and total coverage",
+        "what": "Tests on the default branch, and therefore total coverage",
         "paths": [
-          "src/"
+          "src/",
+          "package.json"
         ],
-        "why": "The repo has no test framework, no test files and no test script, so commands.test is null — that is a fact about the repo, not a gap in the sandbox. Until tests exist the tests gate has nothing of the repo's own to run and total coverage stays at the 0% floor in .factory/guardrails/coverage.json. Diff coverage still applies, so the first change to src/ has to bring both its tests and the runner that executes them, and adding that runner is a package.json change that this manifest's install command will pick up without an amendment."
+        "why": "main as of commit 1f85fe2 still has no test files and no `test` script in package.json, so `npm test --if-present` runs nothing there and exits 0. That is a fact about the branch, not about the command: the command is set so that the gate stops being blind the moment a pull request brings a `test` script, which is what the amendment asked for and what several open pull requests do. Until such a branch merges, total coverage stays at the 0% floor in .factory/guardrails/coverage.json and diff coverage (80%) is the only coverage check with teeth."
+      },
+      {
+        "what": "A branch that adds test files without adding the `test` script",
+        "paths": [
+          "package.json"
+        ],
+        "why": "`npm test --if-present` delegates to the repo's own `test` script, so a pull request that adds test/*.test.js but no script to run them passes this gate having run nothing. The guard is deliberate — see the episode — and it is the price of the trial reaching `renders` on a main that has no script yet. A change that adds tests must add the runner in the same pull request; fundamentals.md and history.md both say so, and a builder that forgets will see the tests gate pass without its tests in the output tail."
       },
       {
         "what": "Anything that has to survive a restart",
@@ -139,7 +154,49 @@
       "tried": "trial of round 1: install, run",
       "observed": "reached renders, as claimed",
       "changed": null
+    },
+    {
+      "attempt": 9,
+      "tried": "Amendment. Read amend.json: a builder reports that commands.test is null, so `bsf gates tests` returns the neutral \"this repo has no test command\" verdict and never runs the tests its pull request adds. It asks for commands.test = \"npm test\". Checked the branch the amendment will be measured against: `git log` is at 1f85fe2 and package.json has `start` and `lint` and no `test` script, and there is no test/ directory. The pull request's own contents could not be read — the GitHub integrity policy refused pull-request content to this role — so amend.json's description of it is what this round is built on.",
+      "observed": "The need is real and the literal request is unsafe here. main has no `test` script, and on main `npm test` exits 1 with `Missing script: \"test\"`.",
+      "changed": "Nothing yet; went to read what the trial does with a failing test step before choosing the command."
+    },
+    {
+      "attempt": 10,
+      "tried": "Read the trial itself rather than guessing: .github/workflows/factory-setup-trial.yml, and trialSandbox/reachedTier inside the vendored runner.",
+      "observed": "Three facts decide this. (1) factory-setup is a workflow_dispatch and the trial job checks out the dispatched ref with no override, so the commands are measured against main as it is today — no `test` script. (2) reachedTier returns \"static\" outright if the test step fails, and the run and screenshot steps are skipped entirely unless every earlier step passed, so a test command that fails on main does not merely lose the test step, it collapses the claim from renders to static for every round. (3) After build and test pass, the trial re-runs them in an empty temporary directory and records a \"control\" step that fails if they pass there too — so the command must also fail outside this repo.",
+      "changed": "Rejected the literal `npm test`. The command has to satisfy all three at once: run the repo's tests where a `test` script exists, exit 0 on a main that has none, and fail in an empty directory."
+    },
+    {
+      "attempt": 11,
+      "tried": "Measured the candidates in the trial's own closed environment (`env -i` with PATH, HOME, TMPDIR, LANG, CI, PORT) under node v24.22.3 and npm 11.19.1, in three places: this repo at main, an empty directory, and a scratch copy of the repo carrying the shape amend.json describes.",
+      "observed": "`npm test` — main: exit 1, `Missing script: \"test\"`. Empty directory: exit 254 (no package.json). Collapses the tier. `node --test` (bare) — empty directory: exit 0, \"tests 0\", so the control step would fail it and the tier would be static for the opposite reason. `npm test --if-present` — main: exit 0, runs nothing; empty directory: exit 254; scratch copy with a `test` script: runs the tests.",
+      "changed": "Set commands.test to `npm test --if-present`. It is the repo's own `npm test`, guarded only against the window in which main has no script yet; the guard is on the script, and in an empty directory npm fails on the missing package.json before the guard is reached, so the control step still proves the command depends on this repo."
+    },
+    {
+      "attempt": 12,
+      "tried": "Checked that the gate reads what it needs from that command, since `runTestsGate` keys entirely on the exit status. Built a scratch copy of src/ outside the repo with a `test` script and a test/util.test.js over util.money, util.money2 and util.total, and ran `npm test --if-present` against it passing and then failing.",
+      "observed": "Passing: 3 tests, exit 0. Then one deliberately wrong assertion appended: exit 1, with the failure in the tail of the output that the gate hands back to the builder. A first attempt here used `node --test test/` as the script and node v24 resolved `test/` as a module path rather than a directory of tests — a real trap for whoever writes the script, not a property of the manifest command. `node --test test/*.test.js` works.",
+      "changed": "Recorded the exit-code evidence under capabilities.exercised, and put the `node --test test/` trap in the runbook so the next builder does not lose an attempt to it."
+    },
+    {
+      "attempt": 13,
+      "tried": "Re-ran the whole sequence end to end in the closed environment to confirm the amendment broke nothing that already worked: `npm ci`, `npm run lint`, `npm test --if-present`, the empty-directory control, then `node src/server.js` with all six routes and the seed command.",
+      "observed": "install exit 0 (159 packages from the lock file, 0 vulnerabilities); lint exit 0; test exit 0; control exit 254 (fails outside the repo, as required). The server logged `listening on 3000`; /health 200 `ok`; / 200; the seed added three items; /report gave lines 3, units 16, value $297.37; / showed `total: $297.37`; /export returned the CSV with both headers; /delete?id=2 returned 302 and /report fell to lines 2, units 4, value $237.49; POST /add with no name returned 400. The first `npm ci` of this round failed with EAI_AGAIN on registry.npmjs.org and succeeded unchanged on retry — a transient DNS failure in this agent's own sandbox, not a property of the manifest; registry.npmjs.org is on the role's allowlist and the schema notes package registries are reachable without being listed in egress.",
+      "changed": "Nothing. install, run, seed, app_url, env, services, egress and stubs are carried over from the frozen manifest unchanged; commands.test is the only field whose value changed."
+    },
+    {
+      "attempt": 14,
+      "tried": "Validated this manifest with `.factory/bin/bsf sandbox check --file /tmp/gh-aw/agent/bsf/setup/manifest.json`.",
+      "observed": "Valid, tier renders.",
+      "changed": null
+    },
+    {
+      "attempt": 15,
+      "tried": "trial of round 1: install, test, control, run",
+      "observed": "reached renders, as claimed",
+      "changed": null
     }
   ],
-  "frozen_at": "2026-11-21T04:45:08.577Z"
+  "frozen_at": "2026-11-21T08:57:06.317Z"
 }

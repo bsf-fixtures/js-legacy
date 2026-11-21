@@ -4,7 +4,8 @@
 #
 # The list is short because the stack is: express is the single runtime
 # dependency, eslint the single dev dependency, and everything else is node
-# itself and the web platform. Nothing was added speculatively.
+# itself and the web platform. Nothing was added speculatively, and this
+# amendment added nothing: setting commands.test introduced no library.
 
 # express 4.x — the router, express.urlencoded, res.send/redirect/status and
 # the response headers set in src/handlers.js. src/server.js is almost
@@ -12,8 +13,12 @@
 expressjs.com
 
 # node.js — CommonJS module resolution, process.env, require.main, and the
-# built-in test runner, which is the most likely way tests arrive in a repo
-# with one dependency and no test framework.
+# built-in test runner. The test runner is no longer a guess: commands.test
+# is now `npm test --if-present`, node has a runner built in, and this repo's
+# one-dependency rule argues against adding a framework beside it. The
+# `node --test` CLI page is the one to read, including how it resolves a path
+# argument — node 24 treats `node --test test/` as a module path, not as a
+# directory to scan.
 nodejs.org
 
 # eslint 9 — flat config (eslint.config.mjs) and the rule reference. The
