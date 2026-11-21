@@ -1,0 +1,13 @@
+{
+  "role": "builder",
+  "needs": "commands.test set to `npm test`, so the tests gate runs this suite and the coverage gate finds the report it writes",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    "package.json",
+    "tests/"
+  ],
+  "why": "The manifest records commands.test as null and lists \"Automated tests and total coverage\" under capabilities.not_exercised, because until now the repo had neither a test runner nor a test. This PR adds both: a `test` script in package.json that runs node's built-in test runner (no new dependency) and writes an lcov report to coverage/lcov.info, and 57 tests over all five files in src/. I ran `npm test` here and it passes with 98.04% line coverage of src/, but the sandbox itself still cannot exercise it: `bsf gates tests` reads commands.test and returns neutral with \"this repo has no test command\", and `bsf gates coverage` then finds no coverage report because nothing produced one. Both gates stay blind to this suite until the manifest is amended. The manifest is protected, so I did not edit it. No service, credential or stub is needed - the suite is pure node plus the express app on an ephemeral loopback port, and it needs nothing beyond the variables the sandbox already supplies.",
+  "work_item": "wi_01M7YK24AA5DKDJXQJXF8K8KDF",
+  "reported_at": "2026-11-21T08:53:44.743Z",
+  "reports": 1
+}
