@@ -1,0 +1,13 @@
+{
+  "role": "verifier",
+  "needs": "commands.test in the manifest, so the tests gate runs the suite this PR adds. The manifest was frozen when the repo had no runner and records commands.test as null; it now has one (`npm test`, node --test, emitting coverage/lcov.info). I ran the suite by hand to verify it, but the gate itself is still pointed at null and will keep treating this repo as untested.",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    "package.json",
+    "test/report.test.js"
+  ],
+  "why": "Not a blocked check: every acceptance check passed and nothing was left unexercised. This is the amendment the runbook's Test section explicitly anticipated (\"whoever adds it should also set commands.test through an amendment so the gate stops being blind\"). The manifest's capabilities.not_exercised entry for \"Automated tests and total coverage\" is now stale for the same reason. Suggested value: `npm test`, with coverage read from coverage/lcov.info (relative SF: paths, verified).",
+  "work_item": "wi_01M7YGYNWVV39K31B4V2SQ0AFX",
+  "reported_at": "2026-11-21T08:46:42.521Z",
+  "reports": 1
+}
