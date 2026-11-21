@@ -16,21 +16,29 @@ npm ci
 ```
 
 There is no build step. The app is plain CommonJS run straight by node — no
-bundler, no transpiler, no type checker, no generated files, and nothing in
-`package.json` under a `build` script. `npm ci` is the whole of it, and
-`commands.build` in the manifest is `null` for that reason.
+bundler, no transpiler, no type checker, no generated file, and no `build`
+script in `package.json`. `npm ci` is the whole of it, and `commands.build`
+in the manifest is `null` for that reason.
 
 `npm ci` rather than `npm install`: it installs exactly what the committed
 `package-lock.json` pins and fails if the lock file and `package.json`
 disagree, so a round cannot quietly resolve a different dependency tree.
-Measured here: 159 packages, under a second, in an environment holding only
-`PATH`, `HOME`, `TMPDIR`, `LANG`, `CI` and `PORT`.
+Measured here: exit 0, the 159 packages the lock file pins, 0 vulnerabilities.
+
+It needs the network, and that is its only external dependency:
+`registry.npmjs.org` is in the manifest's `egress` list. Running it with the
+environment stripped to `PATH`, `HOME`, `TMPDIR`, `LANG`, `CI` and `PORT`
+fails with `EAI_AGAIN`, because stripping the environment also strips this
+runner's proxy configuration — not because the install wants anything of a
+developer's own.
 
 `npm run lint` (`eslint src`) also works once the install has run, but it is
 deliberately **not** part of the build. Linting belongs to the static gate,
 which runs the repo's own linter and compares each rule's per-file count
-against `.factory/guardrails/baselines.json`. Running it here as well would
-turn a baselined violation into a build failure.
+against `.factory/guardrails/baselines.json`. Running it in the build would
+turn a baselined violation into a build failure — and with the rules setup
+installed it reports 36 violations on untouched code, so the build would
+fail every time.
 
 ## Run
 
@@ -39,8 +47,7 @@ node src/server.js
 ```
 
 Equivalent to `npm start`, which runs the same file. The sandbox uses the
-direct form so that nothing sits between a stop signal and the server
-process.
+direct form so nothing sits between a stop signal and the server process.
 
 The app is then at http://127.0.0.1:3000/.
 
@@ -54,11 +61,11 @@ in its own memory, so stopping it discards everything that was added.
 # none
 ```
 
-**This repo has no tests.** No test framework, no test files, no `test`
-script in `package.json`, and no CI workflow that runs any — every workflow
-under `.github/workflows/` belongs to the factory, not to the app. The
-manifest records `commands.test` as `null`, which says "this repo has none",
-not "setup did not find out".
+**This repo has no tests.** No test framework, no test file, no `test` script
+in `package.json`, and no CI workflow that runs any — every workflow under
+`.github/workflows/` belongs to the factory, not to the app. The manifest
+records `commands.test` as `null`, which says "this repo has none", not
+"setup did not find out".
 
 What follows from that:
 
@@ -96,17 +103,24 @@ actually returned, not what the README predicts.
 5. `curl -s http://127.0.0.1:3000/report` → `lines`, `units` and `value`.
    `lines` counts rows, `units` sums qty, `value` is the same total as on `/`.
 6. `curl -s -D- http://127.0.0.1:3000/export` → a CSV body beginning
-   `id,name,qty,price`, with `Content-Type: text/csv` and
+   `id,name,qty,price`, with `Content-Type: text/csv; charset=utf-8` (the
+   handler sets `text/csv`; express appends the charset) and
    `Content-Disposition: attachment; filename="stock.csv"`. Prices here have
    no dollar sign — `util.money2`, not `util.money`.
 7. Click a row's **delete** link, or
    `curl -s -o /dev/null -w '%{http_code}' 'http://127.0.0.1:3000/delete?id=2'`
    → 302, and the row and its value are gone from both `/` and `/report`.
 
-Two cases worth checking whenever handler input parsing changes, both
-verified here: `POST /add` with no name returns 400 `name required`, and a
-non-numeric qty or price is coerced to `1` and `0` respectively rather than
-rejected.
+Three cases worth checking whenever handler input parsing or HTML building
+changes, all three verified here:
+
+- `POST /add` with no name → 400 `name required`.
+- `POST /add` with qty `abc` and price `xyz` → 302, and a row reading qty `1`,
+  price `$0.00`. The coercion is deliberate, not a bug.
+- A name of `<b>Bolt</b> & "M6"` comes back from `/` as
+  `&lt;b&gt;Bolt&lt;/b&gt; &amp; "M6"` and renders as literal text — `util.esc`
+  handles `&`, `<` and `>` and **not** quotes — and comes back from `/export`
+  raw and unquoted.
 
 ## Seed data
 
@@ -174,6 +188,7 @@ is nothing here that could reach something real.
 this file, `app_url` in the manifest and the port the process actually binds
 cannot drift apart.
 
-Alongside it the sandbox passes through only `PATH`, `HOME`, `TMPDIR`,
-`LANG`, `CI` and `RUNNER_TEMP`, which the runner supplies to every sandbox.
-The install and the app were both verified under exactly that set.
+Alongside it the runner supplies the usual `PATH`, `HOME`, `TMPDIR`, `LANG`,
+`CI` and `RUNNER_TEMP`, plus whatever proxy configuration it needs for the
+egress hosts the manifest declares. `npm ci` is the only command here that
+uses the network.
