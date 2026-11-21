@@ -13,5 +13,7 @@
   "why": "The repo had no test runner, so setup recorded commands.test as null and the manifest is frozen and protected (policy paths.protected lists .factory/sandbox/**), which this gardening pipeline may not change. This PR adds the runner the manifest predicted would arrive: node's built-in test runner, driven by a new `test` script in package.json, needing no new dependency, so `npm ci` picks it up with no other amendment. Run here it is 48 tests, all passing, 98.04% line coverage of src/ (server.js lines 18-21, the `require.main === module` listen guard, are the only uncovered lines by design). Until commands.test is set, bsf gates tests still reports `no_tests`/neutral and the coverage gate still finds no report, so the suite is written but the gates stay blind to it.",
   "work_item": "wi_01M7YGYNWV7PWW4ANARRCZTC5N",
   "reported_at": "2026-11-21T07:58:00.788Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YGYNWV7PWW4ANARRCZTC5N) closed without merging"
 }

@@ -9,5 +9,7 @@
   "why": "The manifest records commands.test as null and lists 'Automated tests and total coverage' under capabilities.not_exercised, because the repo had no test framework, no test files and no test script. This PR changes that fact: package.json now has a `test` script (`node --test`, node's built-in runner, no new dependency) and src/report.test.js covers src/report.js at 100% of lines. I ran `npm test` here (6 tests, all passing) and `node --test --experimental-test-coverage` to read the coverage, but the gates read commands.test from main's manifest, so `bsf gates tests` will still report no_tests and `bsf gates coverage` will still find no report and return neutral against the 0% floor. Nothing in the sandbox blocked the work; what is missing is the manifest line that lets the gate see it. The manifest is protected, so I have not edited it. Suggested amendment: set commands.test to `npm test`. If the coverage gate should also have teeth, the test script needs to emit coverage/lcov.info (node's `--experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info`) and coverage/ needs a .gitignore entry; I left that out of this PR because it is not part of the work item.",
   "work_item": "wi_01M7YH2HPVH3YCXTH7H08G7S0C",
   "reported_at": "2026-11-21T08:30:49.578Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YH2HPVH3YCXTH7H08G7S0C) closed without merging"
 }

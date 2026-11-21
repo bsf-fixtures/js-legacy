@@ -10,5 +10,7 @@
   "why": ".factory/sandbox/** is protected by .factory/definition/policy.yaml, so a gardening PR cannot set commands.test itself; the runbook and history.md both predicted this exact handover (\"whoever adds it should also set commands.test through an amendment\"). Everything else was exercised here: `npm ci`, `npm test` (35 passing, 100% line/branch/function coverage of src/util.js and src/db.js), `npm run lint` (clean), and `node src/server.js` still boots and serves / and /health. Nothing outside the sandbox was needed - these are pure helpers and an in-process array.",
   "work_item": "wi_01M7YJRKWS7V0XBP8ZG8HFTG33",
   "reported_at": "2026-11-21T08:46:12.157Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YJRKWS7V0XBP8ZG8HFTG33) closed without merging"
 }

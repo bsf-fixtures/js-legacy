@@ -9,5 +9,7 @@
   "why": "The manifest was frozen at 2026-11-21T04:45:08Z, when the repo genuinely had no test framework, no test files and no test script, so commands.test: null was correct at the time. That fact changed in this PR. The manifest itself predicted this amendment: its not_exercised entry says \"adding that runner is a package.json change that this manifest's install command will pick up without an amendment\", and the runbook says \"whoever adds it should also set commands.test through an amendment so the gate stops being blind\". The runner is node's built-in `node --test`, so `npm ci` already provides everything needed (eslint is the only import, and it is an existing devDependency) — no new service, stub or egress is required, only the command field. Verified in this sandbox: `npm ci` leaves package-lock.json unchanged, and `npm test` passes 4/4 from a clean install, repeatably and independent of cwd.",
   "work_item": "wi_01M7YGYNWVHW8E4K9EJB34BEFD",
   "reported_at": "2026-11-21T08:29:53.451Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YGYNWVHW8E4K9EJB34BEFD) closed without merging"
 }

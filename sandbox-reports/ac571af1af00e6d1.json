@@ -11,5 +11,7 @@
   "why": "The manifest records commands.test as null and lists \"Automated tests and total coverage\" under capabilities.not_exercised, because until now the repo had no runner. This PR adds one: `npm test` runs node's built-in test runner over test/ and writes coverage/lcov.info, scoped to src/**. I ran it here (25 tests, exit 0, src/db.js and src/util.js both at 100% lines), but commands.test is still null, so bsf gates tests returns neutral 'no_tests' for this commit and bsf gates coverage sees no report unless something else runs the command first. .factory/sandbox/** is protected, so I did not edit the manifest. One thing to know when amending it: coverage counts only the modules a test loads, so total coverage will read 100% while three of the five files in src/ (handlers.js, report.js, server.js) are absent from the report entirely. That figure is not a reason to raise floor_pct in .factory/guardrails/coverage.json.",
   "work_item": "wi_01M7YGYNWVCDVT90GGKS6D50KB",
   "reported_at": "2026-11-21T07:59:56.792Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YGYNWVCDVT90GGKS6D50KB) closed without merging"
 }

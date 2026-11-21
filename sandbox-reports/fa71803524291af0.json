@@ -10,5 +10,7 @@
   "why": "commands.test is null and manifest.json is a protected file, so the builder could not set it in this PR. I ran `npm test` by hand in the sandbox and it passes (25 tests, exit 0, coverage/lcov.info written), but the factory's tests gate still has no command to run, so the suite is unverified by the gate on this commit. Separately, node counts coverage only for modules a test loads: coverage/lcov.info contains only src/db.js and src/util.js, so a total-coverage number read from it is 100% while src/handlers.js, src/report.js and src/server.js are absent from the report entirely. That 100% is not a reason to raise floor_pct or high_pct in .factory/guardrails/coverage.json. Also not exercisable through the running app: util.pad is called from nowhere in src/, so no route reaches it and it can only be covered by a unit test.",
   "work_item": "wi_01M7YGYNWVCDVT90GGKS6D50KB",
   "reported_at": "2026-11-21T08:40:12.671Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YGYNWVCDVT90GGKS6D50KB) closed without merging"
 }

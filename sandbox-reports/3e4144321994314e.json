@@ -9,5 +9,7 @@
   "why": "Protected path: policy.yaml lists .factory/sandbox/** under paths.protected, and the gardening pipeline may change only code and tests. The capabilities.not_exercised entry 'Automated tests and total coverage' and the runbook's Test section both predict this exact amendment. Measured here with the new tests: src/handlers.js 100% of lines, src/server.js 82.6% (only the require.main listen block), 90.2% across src/.",
   "work_item": "wi_01M7YGYNWVD9W3S5VK4M9BHC1P",
   "reported_at": "2026-11-21T08:27:40.651Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YGYNWVD9W3S5VK4M9BHC1P) closed without merging"
 }

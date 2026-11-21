@@ -10,5 +10,7 @@
   "why": "This PR adds node --test as the runner plus 31 tests over src/, and `npm test` exits 0 writing coverage/lcov.info at 98.04% line coverage. I ran it by hand in the sandbox and it works, so no acceptance check was blocked. But the gates cannot see it: commands.test resolves to `none`, so the tests gate reports neutral and the coverage gate finds no report. .factory/sandbox/** is a protected path that the gardening pipeline may not change, so the builder could not wire this up itself — it needs an amendment episode. Until then the suite is green but ungated, and a later change could break it without any gate noticing.",
   "work_item": "wi_01M7YGS7KXRFFWPFSXXZQKPJ6X",
   "reported_at": "2026-11-21T08:15:26.533Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YGS7KXRFFWPFSXXZQKPJ6X) closed without merging"
 }

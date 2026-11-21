@@ -9,5 +9,7 @@
   "why": "The manifest records commands.test as null, which was true: the repo had no tests. This PR adds them (node:test, no new dependency) plus an `npm test` script that writes coverage/lcov.info, which is one of the three report locations the coverage gate reads. Until the manifest is amended the tests gate still concludes neutral with 'this repo has no test command', so the suite runs nowhere but here, and total coverage stays at the 0% floor even though `npm test` measures 98% of src/. The manifest is protected by policy (.factory/sandbox/**), so this report is the only way to ask for the change. Verified in this sandbox: `npm ci` needs no amendment to pick the suite up, `npm test` is 46 passing tests in about 0.8s under the sandbox's own environment, and the lcov it writes names the five src/ files with repo-relative paths.",
   "work_item": "wi_01M7YJRKWSPZDNGY5HW6QXPZYM",
   "reported_at": "2026-11-21T08:49:56.782Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YJRKWSPZDNGY5HW6QXPZYM) closed without merging"
 }

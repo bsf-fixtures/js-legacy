@@ -9,5 +9,7 @@
   "why": "This PR adds the repo's first test runner (node's built-in `node --test`, no new dependency) and its first test file. The manifest still records commands.test as null, so the tests gate has nothing to run and will stay blind to these tests even though `npm test` works in the sandbox (verified here: 4 tests, exit 0, after `npm ci`). The manifest itself is protected, and the runbook/manifest both say the runner addition should be followed by an amendment that sets commands.test, so I am reporting it rather than editing the manifest.",
   "work_item": "wi_01M7YGYNWVHW8E4K9EJB34BEFD",
   "reported_at": "2026-11-21T08:01:17.932Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YGYNWVHW8E4K9EJB34BEFD) closed without merging"
 }

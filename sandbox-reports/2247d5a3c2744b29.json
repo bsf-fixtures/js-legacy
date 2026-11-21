@@ -9,5 +9,7 @@
   "why": "This PR adds the repo's first tests (test/util.test.js) and the runner that executes them (`npm test` -> `node --test`, node's built-in runner, no new dependency). The manifest still has commands.test: null, and bsf gates tests reads its command from the manifest, so it returns the neutral \"this repo has no test command\" verdict and never runs them. The manifest is under policy.paths.protected, so a builder cannot amend it; this report is the amendment request. history.md anticipated exactly this: the first change to src/ has to bring tests and a runner, and then the sandbox needs amending so the gate stops being blind. Verified locally in the sandbox: `npm test` passes 6 tests in ~0.1s under the closed environment, and `npm run lint` still reports zero violations across the whole repo.",
   "work_item": "wi_01M7YH2HPVHHGWTCXTPGC5HTQ2",
   "reported_at": "2026-11-21T08:33:01.051Z",
-  "reports": 1
+  "reports": 1,
+  "dropped_at": "2026-11-21T09:42:19.061Z",
+  "dropped_why": "its change (wi_01M7YH2HPVHHGWTCXTPGC5HTQ2) closed without merging"
 }
