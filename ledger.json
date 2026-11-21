@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T13:55:34.109Z",
+  "updated_at": "2026-11-21T14:04:58.828Z",
   "open": [
     {
       "work_item": "wi_01M7Y4H6GSWY2F7HGEA1BGSZGM",
@@ -56,7 +56,8 @@
       "created_at": "2026-11-21T13:55:13.637Z",
       "fixes": [
         "no test runner; untested behaviour in src"
-      ]
+      ],
+      "pr": 42
     }
   ],
   "recent": [
