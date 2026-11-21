@@ -1,0 +1,13 @@
+{
+  "role": "builder",
+  "needs": "commands.test in .factory/sandbox/manifest.json set to \"npm test\". This PR adds the repo's first test runner (node's built-in node:test, no new dependency) and 52 tests over all five files in src/, but commands.test is still null, so `bsf gates tests` reads the manifest from the default branch, finds no command and concludes neutral/no_tests. The tests therefore do not gate anything until the manifest is amended. The same amendment is the moment to decide about coverage: `npm test` currently prints a spec report and writes no coverage file, so `bsf gates coverage` finds no report and passes trivially against the 0% floor. Changing the script to emit coverage/lcov.info (node --test --experimental-test-coverage with the lcov reporter) would give the coverage gate something real to measure; measured here, the five src files are at 100% line coverage except src/server.js:18-21, the app.listen callback, which only runs in a spawned child process.",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    "package.json",
+    "tests/"
+  ],
+  "why": ".factory/sandbox/** is protected by .factory/definition/policy.yaml, so the builder cannot set commands.test itself, and the gates read the manifest from main rather than from the PR. runbook.md anticipated exactly this: \"whoever adds it should also set commands.test through an amendment so the gate stops being blind.\" Everything else was exercisable here: `npm test` runs all 52 tests green in the sandbox environment, `npm run lint` is clean, and each test was mutation-checked against a deliberate break in the file it covers.",
+  "work_item": "wi_01M7YGS7KXJCTHVJ9J5RH6JKC2",
+  "reported_at": "2026-11-21T07:56:02.232Z",
+  "reports": 1
+}
