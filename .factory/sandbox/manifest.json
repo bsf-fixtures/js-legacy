@@ -15,11 +15,12 @@
       "name": "PORT",
       "kind": "self",
       "value": "3000",
-      "why": "The only variable this app reads. src/server.js:15 is `var port = process.env.PORT || 3000`, and that port is the whole of the app's own origin: there is no base-URL setting, no allowlist and no callback URL anywhere in src/. 3000 is set explicitly rather than left to the default so that app_url and the runbook cannot drift from what the process actually binds."
+      "why": "The only variable this app reads. A search of src/ for process.env, config-file reads and settings modules returns exactly one hit: src/server.js:15, `var port = process.env.PORT || 3000`. That port is the whole of the app's own origin — there is no base URL setting, no callback URL, no CORS allowlist and no feature flag anywhere in src/. 3000 is set explicitly rather than left to the `|| 3000` default so that app_url, the runbook and the port the process actually binds cannot drift apart."
     }
   ],
   "services": [],
   "egress": [
+    "registry.npmjs.org",
     "cdn.playwright.dev",
     "playwright.download.prss.microsoft.com"
   ],
@@ -28,32 +29,45 @@
     {
       "from": "package.json",
       "what": "the `lint` script (`eslint src`)",
-      "why": "Linting is the static gate's job: `bsf gates static` runs the repo's own linter and compares each rule's per-file count against .factory/guardrails/baselines.json. Putting it in `build` or `test` would make a baselined lint violation fail the trial as a build error and would count the same finding twice. It is still runnable in the sandbox — `npm run lint` works once `npm ci` has run — it is just not in the build path."
+      "why": "Linting is the static gate's job: `bsf gates static` runs the repo's own linter and compares each rule's per-file count against .factory/guardrails/baselines.json. Putting it in `build` or `test` would turn a baselined violation into a build failure and would count the same finding twice. With this round's guardrails applied, `npm run lint` reports 36 violations (no-var 32, eqeqeq 3, no-console 1) on untouched code, so a build that included it would fail every time. It is still runnable in the sandbox once `npm ci` has run; it is just not in the build path."
     },
     {
       "from": "README.md",
       "what": "`npm install` as the install command",
-      "why": "Replaced with `npm ci`, which installs exactly what the committed package-lock.json pins and fails loudly if the lock file and package.json disagree, so the sandbox cannot silently resolve a different dependency tree from one round to the next. `npm ci` was the command actually run and verified here; `npm install` was not."
+      "why": "Replaced with `npm ci`, which installs exactly what the committed package-lock.json pins and fails loudly if the lock file and package.json disagree, so the sandbox cannot silently resolve a different dependency tree from one round to the next. `npm ci` is the command actually run and verified here; `npm install` was not."
     },
     {
       "from": "package.json",
       "what": "`npm start` as the run command",
-      "why": "Replaced with the equivalent `node src/server.js`. The trial stops the app by signalling the detached process group, and running node directly means there is no npm wrapper process between the signal and the server. `npm start` is kept in the runbook as the command a developer would type; the two run the same file."
+      "why": "Replaced with the equivalent `node src/server.js` — `start` runs that same file. The trial stops the app by signalling the process group, and running node directly means there is no npm wrapper process between the signal and the server. `npm start` stays in the runbook as the command a developer would type."
+    },
+    {
+      "from": "README.md",
+      "what": "the `## Verify by hand` steps as a build or test command",
+      "why": "They are a human checklist, not a command. Each one was run here (see capabilities.exercised) and the results written into the runbook's Verify section, which is where a verifier agent will look for them. None of them belongs in commands.build or commands.test: there is nothing to assert against, so a command wrapping them would pass in an empty directory too and would push the measured tier down to static."
+    },
+    {
+      "from": "the whole repository",
+      "what": "every production and deployment concern — there are none to drop",
+      "why": "Recorded because the search found nothing rather than because nothing was looked for. There is no Dockerfile, no compose file, no devcontainer, no Procfile, no deploy script, no release step and no app CI: all 35 files under .github/workflows/ belong to the factory itself. So no ENTRYPOINT, no deploy command and no release step was read into this manifest, because none exists."
     }
   ],
   "capabilities": {
     "exercised": [
-      "GET / in a real browser: the Stock heading, the bordered table, one row per item with the price formatted as dollars, the running total, the add form and the export link. Verified with Playwright against the running app, including a full-page screenshot.",
-      "POST /add through the browser form: filling name, qty and price in cents and clicking add redirects back to / with a new row and an updated total.",
-      "POST /add over HTTP, including the two fallbacks in src/handlers.js (a non-numeric qty becomes 1, a non-numeric price becomes 0) and the 400 when name is missing.",
-      "GET /delete?id=N: the row disappears and the total drops by that line's value; the missing-id case returns 400.",
-      "GET /report: lines, units and value, which is the only caller of report.totals and report.fmt.",
-      "GET /export: the CSV body and both response headers (Content-Type: text/csv, Content-Disposition: attachment; filename=\"stock.csv\").",
-      "GET /health: returns the string ok with status 200.",
+      "`npm ci` from the committed package-lock.json: exit 0, the 159 packages the lock file pins, 0 vulnerabilities reported.",
+      "`node src/server.js` with PORT=3000: the process logs `listening on 3000` and serves within a second.",
+      "GET / in a real Chromium browser via the Playwright CLI: the Stock heading, the bordered table with the id/name/qty/price header row, one row per item, the per-row delete links, the running total, the three-field add form and the export csv link. Confirmed in the accessibility snapshot and in a full-page screenshot.",
+      "POST /add through the browser form: filling name `Bolt`, qty `5`, price `275` and clicking add redirects back to / with a new row and the total up by $13.75 — qty x price, not price.",
+      "POST /add over HTTP, including both fallbacks in src/handlers.js (a non-numeric qty becomes 1, a non-numeric price becomes 0 — verified, 302 and a $0.00 row) and the 400 `name required` when name is missing.",
+      "GET /delete?id=N: 302, and the row and its value leave both / and /report. The missing-id case returns 400.",
+      "GET /report: lines, units and value. After the seed it read `lines: 3`, `units: 16`, `value: $297.37`. This is the only caller of report.totals and report.fmt.",
+      "GET /export: the CSV body and both response headers — `Content-Type: text/csv; charset=utf-8` (express appends the charset; the handler sets `text/csv`) and `Content-Disposition: attachment; filename=\"stock.csv\"`.",
+      "GET /health: the string `ok` with status 200.",
       "All three money formatters and both totallers, through the pages that call them: util.money and util.total on /, util.money2 on /export, report.fmt and report.totals on /report.",
-      "util.esc, through a name rendered into the / table.",
-      "`npm ci` from the committed package-lock.json in the closed environment (PATH, HOME, TMPDIR, LANG, CI plus PORT and nothing else): 159 packages, exit 0.",
-      "`npm run lint` with the repo's own eslint.config.mjs, which the static gate drives."
+      "util.esc, through a name of `<b>Bolt</b> & \"M6\"` rendered into the / table: `&`, `<` and `>` came back escaped and the double quotes did not, which is what src/util.js:20-29 actually does.",
+      "The seed command against the running app: three POSTs to /add, all 302, and /report agreeing with / afterwards.",
+      "`npm run lint` with the repo's own eslint.config.mjs, which the static gate drives — before this round's guardrails it reported 0 violations, after them 36 across 3 rules and all 5 files.",
+      "Each of the 8 rules this round installs, against the `bad` and `good` example in .factory/rules/javascript.yaml, with this repo's config: every one fires on its bad example and is silent on its good one."
     ],
     "not_exercised": [
       {
@@ -61,14 +75,14 @@
         "paths": [
           "src/"
         ],
-        "why": "The repo has no test framework, no test files and no test script, so commands.test is null — that is a fact about the repo, not a gap in the sandbox. Until tests exist the tests gate has nothing of the repo's own to run and total coverage stays at the 0% floor in .factory/guardrails/coverage.json. Diff coverage still applies, so the first change to src/ has to bring both its tests and the runner that executes them, and adding that runner is a package.json change that this manifest's install command will pick up without an amendment."
+        "why": "The repo has no test framework, no test file and no `test` script, so commands.test is null — a fact about the repo, not a gap in the sandbox. Until tests exist the tests gate has nothing of the repo's own to run and total coverage stays at the 0% floor in .factory/guardrails/coverage.json. Diff coverage (diff_min_pct 80) still applies, so the first change to src/ has to bring both its tests and the runner that executes them; adding that runner is a package.json change `npm ci` picks up, but commands.test then needs an amendment."
       },
       {
         "what": "Anything that has to survive a restart",
         "paths": [
           "src/db.js"
         ],
-        "why": "The store is two module-level variables in src/db.js (`items` and `nextId`). Every restart empties the table and resets ids to 1, and nothing is written to disk. A change about durability, a schema, a migration or a move to a real database cannot be verified here; it would need a database service added by an amendment episode."
+        "why": "The store is two module-level variables in src/db.js (`items` and `nextId`). Every restart empties the table and resets ids to 1, and nothing is written to disk — confirmed here, where ids ran 1..6 within one process and the seed's data vanished with it. A change about durability, a schema, a migration or a move to a real database cannot be verified here; it would need a database service added by an amendment episode."
       },
       {
         "what": "Concurrent or multi-process behaviour",
@@ -76,70 +90,97 @@
           "src/db.js",
           "src/server.js"
         ],
-        "why": "One node process holding state in its own heap: no cluster mode, no worker pool, no lock and no transaction. Two requests interleaving inside db.add or db.remove cannot be reproduced, and nothing about state shared across processes can be checked."
+        "why": "One node process holding state in its own heap: no cluster mode, no worker pool, no lock, no transaction. Two requests interleaving inside db.add or db.remove cannot be reproduced, and nothing about state shared across processes can be checked. require-atomic-updates is installed as a guardrail precisely because this class of bug has no runtime check here."
       },
       {
         "what": "HTTPS, a reverse proxy, a non-localhost origin, or any deployment concern",
         "paths": [
           "src/server.js"
         ],
-        "why": "The app listens on plain HTTP and the sandbox reaches it at 127.0.0.1:3000. The repo has no Dockerfile, compose file, devcontainer or deploy configuration, so there is nothing here that describes another origin. Secure cookie flags, `trust proxy`, CORS, HSTS and host-based routing have no environment in this sandbox to be checked against."
+        "why": "The app listens on plain HTTP and the sandbox reaches it at 127.0.0.1:3000. The repo has no Dockerfile, compose file, devcontainer or deploy configuration, so nothing here describes another origin. Secure cookie flags, `trust proxy`, CORS, HSTS and host-based routing have no environment in this sandbox to be checked against."
       },
       {
         "what": "Any third-party integration",
         "why": "express is the single runtime dependency and src/ makes no outbound network call of any kind, so there is nothing to stub and no provider test mode to name. The stubs list is empty because none is needed, not because one was skipped. A change that adds an outbound call needs an amendment episode to add its stub before it can be verified."
+      },
+      {
+        "what": "Authentication, authorization and anything behind a sign-in",
+        "paths": [
+          "src/server.js",
+          "src/handlers.js"
+        ],
+        "why": "There is nothing behind a sign-in to reach: no users, no sessions, no cookies, no identity provider and no authorization check anywhere in src/. Every one of the six routes is public and anonymous, and all six were exercised. This is a statement that the feature does not exist, not that an identity provider was left unstubbed."
+      },
+      {
+        "what": "The `env -i` closed-environment form of the install",
+        "paths": [
+          "package-lock.json"
+        ],
+        "why": "Running `npm ci` under `env -i` with only PATH, HOME, TMPDIR, LANG, CI and PORT failed here with EAI_AGAIN on registry.npmjs.org, because stripping the environment also strips this runner's proxy configuration. The same `npm ci` with the environment intact succeeded. So what is verified is that the install needs nothing of a developer's own environment beyond reaching the registry; what is not verified is that it works with the proxy settings removed. registry.npmjs.org is listed under egress for that reason."
       }
     ]
   },
   "episode": [
     {
       "attempt": 1,
-      "tried": "Read the repo before running it: package.json, package-lock.json, README.md, eslint.config.mjs, all five files in src/, the .github/workflows/ directory and .factory/definition/factory.yaml.",
-      "observed": "One runtime dependency (express ^4.21.2), one dev dependency (eslint ^9.16.0), two scripts (`start` and `lint`), and `main: src/server.js`. No build step, no test script, no test files, no Dockerfile, no compose file, no devcontainer and no deploy configuration anywhere in the repo. Every workflow under .github/workflows/ belongs to the factory itself, not to the app, so there was no app CI to copy an install or test command from. src/ is flat: server.js wires six express routes to handlers.js and report.js, which both read an in-memory array in db.js and format through util.js.",
-      "changed": "Set commands.build and commands.test to null, since the repo genuinely has neither; recorded the Dockerfile/deploy search as finding nothing rather than leaving it unstated."
+      "tried": "Read the repo before running any of it: package.json, package-lock.json, README.md, eslint.config.mjs, all five files in src/, everything in .github/workflows/, .factory/definition/factory.yaml, .factory/rules/javascript.yaml and the three files in .factory/guardrails/.",
+      "observed": "One runtime dependency (express ^4.21.2), one dev dependency (eslint ^9.16.0), two scripts (`start`, `lint`), `main: src/server.js`. No build step, no test script, no test file, no Dockerfile, no compose file, no devcontainer and no deploy configuration anywhere. Every workflow under .github/workflows/ belongs to the factory, so there was no app CI to copy an install or test command from. src/ is flat: server.js wires six express routes to handlers.js and report.js, which read an in-memory array in db.js and format through util.js.",
+      "changed": "Set commands.build and commands.test to null, because the repo genuinely has neither, and recorded the Dockerfile/deploy search under `dropped` as having found nothing rather than leaving it unstated."
     },
     {
       "attempt": 2,
-      "tried": "Searched src/ for every place configuration is read: process.env, readFileSync, any settings module or requireEnv-style helper.",
-      "observed": "Exactly one hit — src/server.js:15, `var port = process.env.PORT || 3000`. No config file is read, no .env is loaded, and no other environment variable is named anywhere in src/.",
-      "changed": "Made env a single `self` entry for PORT with the literal value 3000, and left it at that rather than padding the list with variables the app never reads."
+      "tried": "Searched src/ for every place configuration is read: process.env, readFileSync, any settings module, any requireEnv-style helper, any .env loader.",
+      "observed": "Exactly one hit — src/server.js:15, `var port = process.env.PORT || 3000`. No config file is read, no .env is loaded, and no other environment variable is named anywhere in src/. There is no API key, connection string, base URL or feature flag in this codebase, so there is nothing here that could reach something real.",
+      "changed": "Made env a single `self` entry for PORT with the literal value 3000, and left it there rather than padding the list with variables the app never reads."
     },
     {
       "attempt": 3,
-      "tried": "Deleted node_modules and ran `npm ci` under `env -i` with only the variables the trial supplies (PATH, HOME, TMPDIR, LANG, CI) plus PORT, to check the install does not depend on anything inherited from the developer's shell.",
-      "observed": "159 packages added, exit 0, about 0.7s. Nothing in the install needed a variable outside that set.",
-      "changed": "Kept `npm ci` as the install command and recorded under `dropped` why it replaces the README's `npm install`."
+      "tried": "Deleted node_modules and ran `npm ci` under `env -i` with only the variables a closed sandbox supplies (PATH, HOME, TMPDIR, LANG, CI) plus PORT, to check the install depends on nothing inherited from a developer's shell.",
+      "observed": "Failed: `npm error code EAI_AGAIN ... getaddrinfo EAI_AGAIN registry.npmjs.org`. The cause is this runner's egress proxy, whose configuration lives in the environment that `env -i` strips, not anything the app or the lock file needs. Re-running `npm ci` with the environment intact succeeded: exit 0, the 159 packages package-lock.json pins, 0 vulnerabilities.",
+      "changed": "Kept `npm ci` as the install command, added registry.npmjs.org to egress so the install's one network dependency is declared rather than assumed, and recorded the unverified half honestly under capabilities.not_exercised instead of claiming the closed-environment run passed."
     },
     {
       "attempt": 4,
-      "tried": "Started `node src/server.js` in the same closed environment and exercised all six routes with curl: /, /health, POST /add, /delete?id=N, /report and /export.",
-      "observed": "The server logged `listening on 3000`. /health returned 200 `ok`; / returned 200 with the table and form; POST /add returned 302 and the item appeared with its price rendered as dollars; /delete returned 302 and the row and its value left the table and the total; /report showed lines, units and value; /export returned the CSV with Content-Type: text/csv and Content-Disposition: attachment; filename=\"stock.csv\". An earlier attempt failed with EADDRINUSE because a server from a previous step was still holding port 3000 — that was my own leftover process, not a property of the app.",
-      "changed": "Set app_url to http://127.0.0.1:3000/ (the literal loopback address rather than localhost, so the trial's fetch cannot depend on how localhost resolves) and wrote the verify steps in the runbook from what these calls actually returned."
+      "tried": "Started `node src/server.js` with PORT=3000 and exercised all six routes with curl: GET /, GET /health, POST /add (good input, missing name, non-numeric qty and price), GET /delete?id=N (present and missing id), GET /report and GET /export with headers.",
+      "observed": "`listening on 3000`. /health -> 200 `ok`. / -> 200 with the table, total and form; on an empty store `total: $0.00` and a header-row-only table. POST /add -> 302 and the row appears with its price rendered as dollars; a missing name -> 400 `name required`; qty `abc` and price `xyz` -> 302 and a row reading qty 1, $0.00. /delete?id=4 -> 302 and the row and its value left both / and /report; /delete with no id -> 400. /report -> `lines: 3`, `units: 16`, `value: $297.37`. /export -> the CSV, `Content-Type: text/csv; charset=utf-8`, `Content-Disposition: attachment; filename=\"stock.csv\"`.",
+      "changed": "Set app_url to http://127.0.0.1:3000/ — the literal loopback address rather than localhost, so the trial's fetch cannot depend on how localhost resolves — and wrote the runbook's Verify steps from what these calls actually returned, including the `; charset=utf-8` the previous round's notes had rounded off."
     },
     {
       "attempt": 5,
-      "tried": "Drove the running app in a real Chromium browser with the Playwright CLI: loaded /, read the accessibility snapshot, filled the name, qty and price fields, clicked add, and took a full-page screenshot.",
-      "observed": "The page renders: heading, table with a row per item, the per-row delete links, `total: $251.24`, the three form fields and the export link. Submitting the form added the row and updated the total. The screenshot was taken successfully. The only console message is a 404 for /favicon.ico, which is expected — the app serves no static files.",
-      "changed": "Claimed tier renders with tier_reason null, on the evidence that the trial's own sequence (start the app, fetch app_url, screenshot it) is the sequence that just succeeded here."
+      "tried": "Added an item named `<b>Bolt</b> & \"M6\"` and read it back from both / and /export, to see how far util.esc actually goes and whether the CSV quotes anything.",
+      "observed": "On / the name came back as `&lt;b&gt;Bolt&lt;/b&gt; &amp; \"M6\"` — `&`, `<` and `>` escaped, the double quotes not — and the browser rendered it as literal text. In the CSV it came back raw and unquoted. Both match the defects the README already lists; neither is new.",
+      "changed": "Nothing in the manifest. Recorded the escaping behaviour under capabilities.exercised and carried the two defects into history.md with what to do instead, rather than treating them as sandbox problems."
     },
     {
       "attempt": 6,
-      "tried": "Wrote a seed command and ran it against the running app: three POSTs to /add with urlencoded name, qty and price.",
-      "observed": "All three succeeded; /report then showed lines 3, units 16, value $297.37, and /export listed the three rows. The seed only works while the app is up, because the store lives in the process.",
-      "changed": "Put the seeder in commands.seed rather than folding it into commands.run, so the run command stays the plain thing a verifier can reason about, and noted in the runbook that it must be run after the app is listening."
+      "tried": "Drove the running app in a real Chromium browser with the Playwright CLI: loaded http://127.0.0.1:3000/, read the accessibility snapshot, filled name/qty/price, clicked add, re-read the snapshot and took a full-page screenshot.",
+      "observed": "The page renders: heading, table with a row per item, the per-row delete links, `total: $299.37`, the three form fields and the export link. Submitting the form moved the total to $313.12, which is exactly 5 x $2.75 more. The screenshot was taken and shows the rendered table. The only console message is a 404 for /favicon.ico — expected, the app serves no static files.",
+      "changed": "Claimed tier renders with tier_reason null, on the evidence that the trial's own sequence — start the app, fetch app_url, screenshot it — is the sequence that just succeeded here. Added the two Playwright download hosts to egress so the trial's browser can be fetched."
     },
     {
       "attempt": 7,
-      "tried": "Validated this manifest with `.factory/bin/bsf sandbox check --file /tmp/gh-aw/agent/bsf/setup/manifest.json`.",
-      "observed": "Valid, tier renders.",
-      "changed": null
+      "tried": "Wrote the seed command and ran it against the running app: three POSTs to /add with urlencoded name, qty and price.",
+      "observed": "All three returned 302; /report then read lines 3, units 16, value $297.37, and /export listed the three rows. The seed only works while the app is up, because the store lives in the process.",
+      "changed": "Put the seeder in commands.seed rather than folding it into commands.run, so the run command stays the plain thing a verifier can reason about, and said in the runbook that it must be run after the app is listening."
     },
     {
       "attempt": 8,
+      "tried": "Guardrails: extended the repo's own eslint.config.mjs with the 8 rules in .factory/rules/javascript.yaml, then probed each rule by writing its `bad` and then its `good` example to src/__guardrail_probe.js, running `npx eslint --format json` on it with this repo's config, and deleting the file.",
+      "observed": "All 8 fire on their bad example and are silent on their good one: no-var, eqeqeq, no-undef, no-unused-vars, no-console, no-fallthrough, no-dupe-keys, require-atomic-updates. Three bad examples additionally trip a second rule (no-unused-vars on the no-undef, no-fallthrough and require-atomic-updates examples), and the require-atomic-updates *good* example trips no-unused-vars on its write-only `total` — a property of the pack's example, not of the rule under test, which is silent on it. `npm run lint` on untouched src/ then reports 36 violations: no-var 32 across all five files, eqeqeq 3 in db.js and util.js, no-console 1 in server.js. No existing violation was fixed and no native baseline file was written; the runner baselines them per file.",
+      "changed": "Nothing in the manifest. Wrote eslint.config.mjs's diff to guardrails.patch and the decisions to guardrails.json. The patch is scoped to eslint.config.mjs: the working tree also carried a pre-existing, unrelated .gitignore edit adding `.playwright-cli/`, which was not mine to ship inside a guardrails patch."
+    },
+    {
+      "attempt": 9,
+      "tried": "Validated this manifest with `.factory/bin/bsf sandbox check --file /tmp/gh-aw/agent/bsf/setup/manifest.json`.",
+      "observed": "valid sandbox manifest, tier renders.",
+      "changed": null
+    },
+    {
+      "attempt": 10,
       "tried": "trial of round 1: install, run",
       "observed": "reached renders, as claimed",
       "changed": null
     }
   ],
-  "frozen_at": "2026-11-21T04:45:08.577Z"
+  "frozen_at": "2026-11-21T08:06:10.979Z"
 }

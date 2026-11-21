@@ -5,8 +5,6 @@
   Every agent reads this first. The question it has to answer is "where would
   this change go?" — so it names folders and what each one owns, not what the
   product does.
-
-  {{PLACEHOLDERS}} are filled in by setup.
 -->
 
 # Feature map — js-legacy
@@ -25,25 +23,27 @@ nobody has built yet.
 
 | Folder | Owns | Depends on |
 | --- | --- | --- |
-| `src/server.js` | The express app and the route table: the six URLs that exist (`/`, `POST /add`, `/delete`, `/export`, `/report`, `/health`), the `express.urlencoded` body parser, reading `PORT`, and the `require.main === module` guard that lets the app be imported without listening. A new route is wired here. | `express`, `src/handlers.js`, `src/report.js` |
-| `src/handlers.js` | Five of the six request handlers: `index` (the stock table, the total and the add form), `add`, `del`, `exportCsv` and `health`. Builds HTML and CSV by string concatenation and sends it. All input parsing and validation lives here. | `src/db.js`, `src/util.js` |
-| `src/report.js` | The `/report` page only: its own totaller (`totals`), its own money formatter (`fmt`) and its renderer. Exports `totals` as well as `render`, though nothing else currently imports it. | `src/db.js` |
-| `src/db.js` | The entire data store: a module-level `items` array and a `nextId` counter, behind `all`, `add`, `find`, `remove`. Owns item shape (`id`, `name`, `qty`, `price`, `created`) and id allocation. Nothing else touches the array. | nothing |
-| `src/util.js` | Shared helpers: `money`, `money2`, `total`, `esc`, `pad`. | nothing |
+| `src/server.js` (23 lines) | The express app and the route table: the six URLs that exist (`GET /`, `POST /add`, `GET /delete`, `GET /export`, `GET /report`, `GET /health`), the `express.urlencoded` body parser, reading `PORT` (line 15), and the `require.main === module` guard (line 17) that lets the app be imported without listening. A new route is wired here. | `express`, `src/handlers.js`, `src/report.js` |
+| `src/handlers.js` (77 lines) | Five of the six request handlers: `index` (lines 5-31 — the stock table, the total and the add form), `add` (33-49), `del` (51-59), `exportCsv` (62-71) and `health` (73-75). Builds HTML and CSV by string concatenation and sends it. All input parsing and validation lives here. | `src/db.js`, `src/util.js` |
+| `src/report.js` (31 lines) | The `/report` page only: its own totaller (`totals`, line 4), its own money formatter (`fmt`, line 16) and its renderer (`render`, line 20). Exports `totals` as well as `render`, though nothing else currently imports it. | `src/db.js` |
+| `src/db.js` (35 lines) | The entire data store: a module-level `items` array and a `nextId` counter, behind `all`, `add`, `find`, `remove`. Owns item shape (`id`, `name`, `qty`, `price`, `created`) and id allocation. Nothing else touches the array. | nothing |
+| `src/util.js` (38 lines) | Shared helpers: `money`, `money2`, `total`, `esc`, `pad`. | nothing |
 
 The import graph is a clean layering with one gap: `server.js` → {`handlers.js`,
 `report.js`} → {`db.js`, `util.js`}, and `db.js` and `util.js` import nothing.
-`report.js` does not use `util.js`, which is why it grew its own copies of
+`report.js` does not import `util.js`, which is why it grew its own copies of
 `money` and `total`.
 
-`util.pad` is exported and called from nowhere.
+`util.pad` is exported (`src/util.js:31`) and called from nowhere — searched
+across all of `src/`, the only other occurrence of the name is in the export
+list on line 38.
 
 ## Shared
 
 | Folder | What it is | Rule |
 | --- | --- | --- |
 | `src/util.js` | The only shared module. Pure functions over values: money formatting (`money` → `"$12.50"`, `money2` → `"12.50"` for the CSV), `total(list)` summing `qty × price`, `esc(s)` escaping `&`, `<` and `>` for HTML, and `pad(n)` zero-padding to two digits. | Pure functions only — no `require` of any other file in `src/`, no I/O, no `req`/`res`. Anything needing the store belongs in `src/db.js`; anything needing a request belongs with its handler. |
-| `src/db.js` | Shared by both feature files, but it is the store rather than a helper. | Every read and write of the item list goes through `all`/`add`/`find`/`remove`. Nothing outside this file touches `items` or `nextId`. |
+| `src/db.js` | Shared by both feature files, but it is the store rather than a helper. | Every read and write of the item list goes through `all`/`add`/`find`/`remove`. Nothing outside this file names `items` or `nextId`. |
 
 There is no `src/shared/` directory, and no directory of any kind under
 `src/`.
@@ -60,13 +60,13 @@ There is no `src/shared/` directory, and no directory of any kind under
   two features need the same thing, it belongs in shared. This already holds:
   `handlers.js` and `report.js` do not import each other. It holds at the
   price of duplication — `report.js` reimplements `util.money` as `fmt` and
-  `util.total` as part of `totals` rather than importing them. That is the
-  wrong resolution: both belong in `src/util.js`, and `report.js` should
-  import them.
+  `util.total` inside `totals` rather than importing them. That is the wrong
+  resolution: both belong in `src/util.js`, and `report.js` should import
+  them.
 
 ## Not in this repo
 
-- **Any test of any kind.** No framework, no test files, no `test` script.
+- **Any test of any kind.** No framework, no test file, no `test` script.
 - **A build step.** No bundler, transpiler, type checker or generated output;
   node runs `src/` directly.
 - **A database or any persistence.** `src/db.js` is an in-memory array; its
@@ -74,11 +74,11 @@ There is no `src/shared/` directory, and no directory of any kind under
   Nothing is written to disk.
 - **Any outbound network call, SDK or third-party integration.** `express` is
   the only runtime dependency.
-- **Authentication, authorization, sessions, cookies or users.** Every route
-  is public and anonymous.
+- **Authentication, authorization, sessions, cookies or users.** All six
+  routes are public and anonymous.
 - **Client-side JavaScript, CSS or static assets.** Every page is a string
-  built on the server; there is no `public/`, no asset route, and the browser's
-  404 for `/favicon.ico` is the visible consequence.
+  built on the server; there is no `public/`, no asset route, and the
+  browser's 404 for `/favicon.ico` is the visible consequence.
 - **A template engine.** HTML is concatenated inside the handlers.
 - **Types.** Plain CommonJS JavaScript, no TypeScript, no JSDoc annotations.
 - **Any deployment or container configuration.** No Dockerfile, compose file,
