@@ -1,0 +1,14 @@
+{
+  "role": "verifier",
+  "needs": "commands.test set to `npm test` in .factory/sandbox/manifest.json, so `bsf gates tests` runs this repo's new suite and `bsf gates coverage` reads the coverage/lcov.info it writes. The manifest still says commands.test: null and capabilities.not_exercised still lists \"Automated tests and total coverage\" with the reason \"the repo has no test framework, no test files and no test script\" — as of this PR that is no longer true. runbook.md's \"## Test\" section (\"This repo has no tests.\") needs the same correction.",
+  "paths": [
+    ".factory/sandbox/manifest.json",
+    ".factory/definition/context/runbook.md",
+    "package.json",
+    "tests/"
+  ],
+  "why": "This PR adds node --test as the runner plus 31 tests over src/, and `npm test` exits 0 writing coverage/lcov.info at 98.04% line coverage. I ran it by hand in the sandbox and it works, so no acceptance check was blocked. But the gates cannot see it: commands.test resolves to `none`, so the tests gate reports neutral and the coverage gate finds no report. .factory/sandbox/** is a protected path that the gardening pipeline may not change, so the builder could not wire this up itself — it needs an amendment episode. Until then the suite is green but ungated, and a later change could break it without any gate noticing.",
+  "work_item": "wi_01M7YGS7KXRFFWPFSXXZQKPJ6X",
+  "reported_at": "2026-11-21T08:15:26.533Z",
+  "reports": 1
+}
