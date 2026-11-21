@@ -6,8 +6,13 @@
     "install": "npm ci",
     "build": null,
     "run": "node src/server.js",
-    "test": null,
+    "test": "npm test",
+    "coverage": "mkdir -p coverage && node --test --experimental-test-coverage --test-coverage-include='src/**' --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info",
     "seed": "for r in \"Widget:3:1250\" \"Gasket:12:499\" \"Flange:1:19999\"; do IFS=: read -r n q p <<< \"$r\"; curl -fsS -o /dev/null -X POST --data-urlencode \"name=$n\" --data-urlencode \"qty=$q\" --data-urlencode \"price=$p\" \"http://127.0.0.1:${PORT:-3000}/add\"; done"
+  },
+  "coverage_report": {
+    "path": "coverage/lcov.info",
+    "format": "lcov"
   },
   "app_url": "http://127.0.0.1:3000/",
   "env": [
@@ -15,7 +20,7 @@
       "name": "PORT",
       "kind": "self",
       "value": "3000",
-      "why": "The only variable this app reads. A search of src/ for process.env, config-file reads and settings modules returns exactly one hit: src/server.js:15, `var port = process.env.PORT || 3000`. That port is the whole of the app's own origin — there is no base URL setting, no callback URL, no CORS allowlist and no feature flag anywhere in src/. 3000 is set explicitly rather than left to the `|| 3000` default so that app_url, the runbook and the port the process actually binds cannot drift apart."
+      "why": "The only variable this app reads. A search of src/ for process.env, config-file reads and settings modules returns exactly one hit: src/server.js:15, `var port = process.env.PORT || 3000`. That port is the whole of the app's own origin — there is no base URL setting, no callback URL, no CORS allowlist and no feature flag anywhere in src/. 3000 is set explicitly rather than left to the `|| 3000` default so that app_url, the runbook and the port the process actually binds cannot drift apart. The test suite is unaffected by it: tests/helpers.js binds port 0 and lets the OS choose, and the one test that runs src/server.js as a child process asks the OS for a free port and overrides PORT for that child, so `npm test` passes with PORT=3000 set and the app already holding 3000 — checked here, both ways round."
     }
   ],
   "services": [],
@@ -29,12 +34,22 @@
     {
       "from": "package.json",
       "what": "the `lint` script (`eslint src`)",
-      "why": "Linting is the static gate's job: `bsf gates static` runs the repo's own linter and compares each rule's per-file count against .factory/guardrails/baselines.json. Putting it in `build` or `test` would turn a baselined violation into a build failure and would count the same finding twice. With this round's guardrails applied, `npm run lint` reports 36 violations (no-var 32, eqeqeq 3, no-console 1) on untouched code, so a build that included it would fail every time. It is still runnable in the sandbox once `npm ci` has run; it is just not in the build path."
+      "why": "Linting is the static gate's job: `bsf gates static` runs the repo's own linter and compares each rule's per-file count against .factory/guardrails/baselines.json. Putting it in `build`, `test` or `coverage` would turn a baselined violation into a build failure and would count the same finding twice. `npm run lint` still reports 36 violations (no-var 32, eqeqeq 3, no-console 1) on untouched code, so a build that included it would fail every time. It is still runnable in the sandbox once `npm ci` has run; it is just not in the build path. Re-checked this round now that tests/ exists: eslint.config.mjs scopes its one config block to `files: [\"src/**/*.js\"]`, so the six new files under tests/ match no config and are linted by no rule — `npx eslint .` and `npx eslint src` both report the same 36. The baselines in .factory/guardrails/baselines.json are therefore still exact, and adding tests did not move the static gate."
+    },
+    {
+      "from": "package.json",
+      "what": "a `coverage` npm script, as the thing commands.coverage calls",
+      "why": "commands.coverage spells the node invocation out in full instead of adding `\"coverage\": \"...\"` to package.json. Setup writes nothing into the repo that is kept, so a script added here would not exist when the gate runs, and this amendment is explicitly not allowed to ship a repo patch. The spelled-out form also keeps the relationship to commands.test visible: both are `node --test` with the same default file discovery over tests/*.test.js, so they run the same 52 tests, and the extra flags only add coverage instrumentation and a second reporter. If someone later adds an `npm run coverage` script, this field should become `npm run coverage` through a further amendment rather than the two drifting apart."
+    },
+    {
+      "from": "node --test's coverage reporters",
+      "what": "the default whole-process coverage scope, and the `--test-coverage-lines`/`--test-coverage-branches` thresholds",
+      "why": "`--test-coverage-include='src/**'` narrows the report to the app's own five files. Without it node also reports on tests/helpers.js and on whatever the runner injects through NODE_OPTIONS — on this machine a `node-trust.cjs` shim from outside the repo, which alone dragged the reported total from 98.04% to 81.14%. Narrowing is safe for the gate: bsf's diff-coverage skips any changed file that is absent from the report (`if (entry === undefined) continue`), so a PR that only touches tests/ measures as nothing-to-measure rather than as uncovered. The threshold flags are left off deliberately — the floor lives in .factory/guardrails/coverage.json and the runner ratchets it; a second threshold inside the command would fail the run before the gate ever read the number."
     },
     {
       "from": "README.md",
       "what": "`npm install` as the install command",
-      "why": "Replaced with `npm ci`, which installs exactly what the committed package-lock.json pins and fails loudly if the lock file and package.json disagree, so the sandbox cannot silently resolve a different dependency tree from one round to the next. `npm ci` is the command actually run and verified here; `npm install` was not."
+      "why": "Replaced with `npm ci`, which installs exactly what the committed package-lock.json pins and fails loudly if the lock file and package.json disagree, so the sandbox cannot silently resolve a different dependency tree from one round to the next. `npm ci` is the command actually run and verified here; `npm install` was not. Re-verified this round after the tests landed: the lock file is unchanged, 159 packages, exit 0 — node's test runner is built in, so the repo's first test suite added no dependency."
     },
     {
       "from": "package.json",
@@ -44,17 +59,23 @@
     {
       "from": "README.md",
       "what": "the `## Verify by hand` steps as a build or test command",
-      "why": "They are a human checklist, not a command. Each one was run here (see capabilities.exercised) and the results written into the runbook's Verify section, which is where a verifier agent will look for them. None of them belongs in commands.build or commands.test: there is nothing to assert against, so a command wrapping them would pass in an empty directory too and would push the measured tier down to static."
+      "why": "They are a human checklist, not a command. Each one was run here (see capabilities.exercised) and the results written into the runbook's Verify section, which is where a verifier agent will look for them. None of them belongs in commands.build, commands.test or commands.coverage: there is nothing to assert against, so a command wrapping them would pass in an empty directory too. The real test command does not have that problem — `npm test` in an empty directory exits 254, checked here, which is what the trial's control step requires."
     },
     {
       "from": "the whole repository",
       "what": "every production and deployment concern — there are none to drop",
-      "why": "Recorded because the search found nothing rather than because nothing was looked for. There is no Dockerfile, no compose file, no devcontainer, no Procfile, no deploy script, no release step and no app CI: all 35 files under .github/workflows/ belong to the factory itself. So no ENTRYPOINT, no deploy command and no release step was read into this manifest, because none exists."
+      "why": "Recorded because the search found nothing rather than because nothing was looked for. There is no Dockerfile, no compose file, no devcontainer, no Procfile, no deploy script, no release step and no app CI: every workflow under .github/workflows/ belongs to the factory itself. So no ENTRYPOINT, no deploy command and no release step was read into this manifest, because none exists. Re-checked this round: the PR that added tests/ added no workflow either, so the tests have no CI of their own and `bsf gates tests` running commands.test is the only thing that will ever run them."
     }
   ],
   "capabilities": {
     "exercised": [
-      "`npm ci` from the committed package-lock.json: exit 0, the 159 packages the lock file pins, 0 vulnerabilities reported.",
+      "`npm ci` from the committed package-lock.json: exit 0, the 159 packages the lock file pins, 0 vulnerabilities reported. Unchanged by the arrival of tests — node:test is built into node and the suite added no dependency.",
+      "`npm test` (`node --test`): 52 tests, 52 pass, 0 fail, 0 skipped, 0 todo, exit 0, in about 0.9s. Run repeatedly and also under the closed environment the trial uses (PATH, HOME, TMPDIR, LANG, CI, PORT only) with PORT=3000 — green both times. Node v24.22.3.",
+      "`npm test` fails when a test fails: a deliberately failing probe test written into tests/ made it exit 1, and the probe was deleted again. The gate can therefore distinguish a broken change from a passing one.",
+      "`npm test` in an empty directory exits 254 (no package.json), so the trial's control step — which re-runs build and test where this repo's code is absent — sees them fail there, as it must for the tier to stand.",
+      "`commands.coverage`: the same 52 tests (same `node --test` discovery over tests/*.test.js), exit 0, writing a parseable lcov report at coverage/lcov.info with five SF records — src/db.js, src/handlers.js, src/report.js, src/server.js, src/util.js. 98.04% of lines overall: 100% for db.js, handlers.js, report.js and util.js, 82.61% for server.js. Verified under the closed environment too, and verified to exit 1 when a test fails.",
+      "The lcov SF paths come out repo-relative (`SF:src/db.js`), which is what bsf's parser wants — it only calls path.relative for absolute paths — so diff coverage will match changed-file paths without any rewriting.",
+      "`npm run lint` with the repo's own eslint.config.mjs, which the static gate drives: 36 violations across 3 rules (no-var 32, eqeqeq 3, no-console 1) and all five files in src/ — identical to the baselines recorded in .factory/guardrails/baselines.json, and identical whether eslint is pointed at `src` or at `.`, because the config's one block is scoped to `src/**/*.js`.",
       "`node src/server.js` with PORT=3000: the process logs `listening on 3000` and serves within a second.",
       "GET / in a real Chromium browser via the Playwright CLI: the Stock heading, the bordered table with the id/name/qty/price header row, one row per item, the per-row delete links, the running total, the three-field add form and the export csv link. Confirmed in the accessibility snapshot and in a full-page screenshot.",
       "POST /add through the browser form: filling name `Bolt`, qty `5`, price `275` and clicking add redirects back to / with a new row and the total up by $13.75 — qty x price, not price.",
@@ -63,26 +84,25 @@
       "GET /report: lines, units and value. After the seed it read `lines: 3`, `units: 16`, `value: $297.37`. This is the only caller of report.totals and report.fmt.",
       "GET /export: the CSV body and both response headers — `Content-Type: text/csv; charset=utf-8` (express appends the charset; the handler sets `text/csv`) and `Content-Disposition: attachment; filename=\"stock.csv\"`.",
       "GET /health: the string `ok` with status 200.",
-      "All three money formatters and both totallers, through the pages that call them: util.money and util.total on /, util.money2 on /export, report.fmt and report.totals on /report.",
-      "util.esc, through a name of `<b>Bolt</b> & \"M6\"` rendered into the / table: `&`, `<` and `>` came back escaped and the double quotes did not, which is what src/util.js:20-29 actually does.",
+      "All three money formatters and both totallers, through the pages that call them: util.money and util.total on /, util.money2 on /export, report.fmt and report.totals on /report. The test suite now covers the same ground directly, including that report.totals.value agrees with util.total.",
+      "util.esc, through a name of `<b>Bolt</b> & \"M6\"` rendered into the / table: `&`, `<` and `>` came back escaped and the double quotes did not, which is what src/util.js:20-29 actually does. tests/util.test.js asserts the same thing, including that quotes are not escaped.",
       "The seed command against the running app: three POSTs to /add, all 302, and /report agreeing with / afterwards.",
-      "`npm run lint` with the repo's own eslint.config.mjs, which the static gate drives — before this round's guardrails it reported 0 violations, after them 36 across 3 rules and all 5 files.",
-      "Each of the 8 rules this round installs, against the `bad` and `good` example in .factory/rules/javascript.yaml, with this repo's config: every one fires on its bad example and is silent on its good one."
+      "Each of the 8 rules setup installed, against the `bad` and `good` example in .factory/rules/javascript.yaml, with this repo's config: every one fires on its bad example and is silent on its good one. Not re-run this round — no guardrail changed in an amendment."
     ],
     "not_exercised": [
       {
-        "what": "Automated tests and total coverage",
+        "what": "The four lines of src/server.js that only run when the file is the entry point",
         "paths": [
-          "src/"
+          "src/server.js"
         ],
-        "why": "The repo has no test framework, no test file and no `test` script, so commands.test is null — a fact about the repo, not a gap in the sandbox. Until tests exist the tests gate has nothing of the repo's own to run and total coverage stays at the 0% floor in .factory/guardrails/coverage.json. Diff coverage (diff_min_pct 80) still applies, so the first change to src/ has to bring both its tests and the runner that executes them; adding that runner is a package.json change `npm ci` picks up, but commands.test then needs an amendment."
+        "why": "src/server.js:18-21 is the body of the `if (require.main === module)` guard — the app.listen call and its `listening on` log. Every in-process test imports the module instead of being it, so those lines never execute inside the coverage run and server.js reports 82.61% of lines rather than 100%. They are not untested: tests/server.test.js spawns `node src/server.js` as a child with PORT set, waits for the `listening on <port>` line and fetches /health through it. Node's coverage only instruments the process it runs in, so the child's execution is invisible to the report. Treat 82.61% on that file as the ceiling for in-process coverage, not as a gap to close by deleting the guard — fundamentals.md records the guard as the deliberate testing seam."
       },
       {
         "what": "Anything that has to survive a restart",
         "paths": [
           "src/db.js"
         ],
-        "why": "The store is two module-level variables in src/db.js (`items` and `nextId`). Every restart empties the table and resets ids to 1, and nothing is written to disk — confirmed here, where ids ran 1..6 within one process and the seed's data vanished with it. A change about durability, a schema, a migration or a move to a real database cannot be verified here; it would need a database service added by an amendment episode."
+        "why": "The store is two module-level variables in src/db.js (`items` and `nextId`). Every restart empties the table and resets ids to 1, and nothing is written to disk. The tests work around it rather than solving it: tests/helpers.js has a `reset()` that removes every item through db.remove, and tests/db.test.js asserts outright that ids keep climbing after a remove and are not reused — so a test must use the id add() hands back, never a literal 1. A change about durability, a schema, a migration or a move to a real database still cannot be verified here; it would need a database service added by an amendment episode."
       },
       {
         "what": "Concurrent or multi-process behaviour",
@@ -90,7 +110,7 @@
           "src/db.js",
           "src/server.js"
         ],
-        "why": "One node process holding state in its own heap: no cluster mode, no worker pool, no lock, no transaction. Two requests interleaving inside db.add or db.remove cannot be reproduced, and nothing about state shared across processes can be checked. require-atomic-updates is installed as a guardrail precisely because this class of bug has no runtime check here."
+        "why": "One node process holding state in its own heap: no cluster mode, no worker pool, no lock, no transaction. Two requests interleaving inside db.add or db.remove cannot be reproduced, and nothing about state shared across processes can be checked. The tests do not change this — they run in-process against the same module state, which is why helpers.reset() exists. require-atomic-updates is installed as a guardrail precisely because this class of bug has no runtime check here."
       },
       {
         "what": "HTTPS, a reverse proxy, a non-localhost origin, or any deployment concern",
@@ -112,11 +132,18 @@
         "why": "There is nothing behind a sign-in to reach: no users, no sessions, no cookies, no identity provider and no authorization check anywhere in src/. Every one of the six routes is public and anonymous, and all six were exercised. This is a statement that the feature does not exist, not that an identity provider was left unstubbed."
       },
       {
+        "what": "Static analysis of the test suite itself",
+        "paths": [
+          "tests/"
+        ],
+        "why": "eslint.config.mjs contains one config block, scoped to `files: [\"src/**/*.js\"]`. The six files under tests/ match no block, so eslint applies no rule to them: `npx eslint .` reports the same 36 violations as `npx eslint src`. The tests use `var` throughout and would carry roughly as many no-var findings as src/ if they were in scope. That is not a sandbox limitation — it is a guardrail-scope decision, and an amendment is not allowed to change guardrails. Widening the config to tests/ is a setup or gardening change, and whoever makes it should expect the static gate to record a fresh per-file baseline for tests/ on the same commit."
+      },
+      {
         "what": "The `env -i` closed-environment form of the install",
         "paths": [
           "package-lock.json"
         ],
-        "why": "Running `npm ci` under `env -i` with only PATH, HOME, TMPDIR, LANG, CI and PORT failed here with EAI_AGAIN on registry.npmjs.org, because stripping the environment also strips this runner's proxy configuration. The same `npm ci` with the environment intact succeeded. So what is verified is that the install needs nothing of a developer's own environment beyond reaching the registry; what is not verified is that it works with the proxy settings removed. registry.npmjs.org is listed under egress for that reason."
+        "why": "Running `npm ci` under `env -i` with only PATH, HOME, TMPDIR, LANG, CI and PORT failed here with EAI_AGAIN on registry.npmjs.org, because stripping the environment also strips this runner's proxy configuration. The same `npm ci` with the environment intact succeeded. So what is verified is that the install needs nothing of a developer's own environment beyond reaching the registry; what is not verified is that it works with the proxy settings removed. registry.npmjs.org is listed under egress for that reason. Note that `npm test` and `commands.coverage` have no such caveat: both were run under exactly that stripped environment and passed, because neither touches the network."
       }
     ]
   },
@@ -180,7 +207,55 @@
       "tried": "trial of round 1: install, run",
       "observed": "reached renders, as claimed",
       "changed": null
+    },
+    {
+      "attempt": 11,
+      "tried": "Amendment. Read both reports in amend.json — one from the verifier, one from the builder, on work item wi_01M7YGS7KXJCTHVJ9J5RH6JKC2 — and treated them as one need: commands.test is null while the repo now has a test runner, so `bsf gates tests` is blind. Then read the repo as it stands rather than trusting the reports: package.json, the six files under tests/, and git log.",
+      "observed": "The reports are accurate. package.json now carries `\"test\": \"node --test\"` and nothing else changed about it — no new dependency, because node:test is built in. tests/ holds helpers.js plus five *.test.js files covering all five files in src/: db 10 tests, handlers 20, report 5, server 6, util 11 — 52, exactly as reported. The PR is merged (e1c481c). The frozen manifest's commands.test is still null and its not_exercised entry about tests is now false.",
+      "changed": "Nothing yet. Established that this is an amendment to a working manifest, so everything else is kept verbatim and only the test and coverage surface moves."
+    },
+    {
+      "attempt": 12,
+      "tried": "`npm ci`, then `npm test`, then `npm test` again, then `npm test` under `env -i` with only the variables the trial's shellBase supplies (PATH, HOME, TMPDIR, LANG, CI) plus PORT=3000 — the last to check the suite does not quietly depend on this runner's environment, and in particular that PORT=3000 does not collide with it.",
+      "observed": "52 tests, 52 pass, 0 fail, 0 skipped, exit 0, about 0.9s, identical every time including under the stripped environment. No network is touched, so the EAI_AGAIN that stops `npm ci` under env -i does not apply here. Reading tests/helpers.js explains why PORT is harmless: it listens on port 0 and lets the OS choose, and tests/server.test.js asks the OS for a free port before spawning src/server.js as a child with PORT overridden for that child only.",
+      "changed": "Set commands.test to `npm test` — the repo's own script, so the gate runs what a developer runs — and rewrote the PORT entry's `why` to record that the suite is independent of it."
+    },
+    {
+      "attempt": 13,
+      "tried": "Checked that the test command actually discriminates, which is the only thing that makes a tests gate worth having. Wrote a deliberately failing test to tests/__probe_fail.test.js, ran `npm test` and the coverage command, then deleted the probe. Separately ran `npm test` in an empty temporary directory, which is what the trial's control step does.",
+      "observed": "With the probe present both commands exit 1. In an empty directory `npm test` exits 254 — npm finds no package.json. So the control step will see the test command fail where this repo's code is absent, and the tier is not at risk from a command that passes everywhere.",
+      "changed": "Nothing in the manifest; recorded both as exercised capabilities and replaced the `dropped` note about the README's hand-verification steps with one that says explicitly why the real test command does not have the same problem."
+    },
+    {
+      "attempt": 14,
+      "tried": "Coverage. Both reports asked for the gate to stop being blind; the builder's also raised that `npm test` writes no coverage file, so `bsf gates coverage` passes trivially. First attempt: `node --test --experimental-test-coverage --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info`.",
+      "observed": "Failed with ENOENT on coverage/lcov.info — node's reporter does not create the directory. Adding `mkdir -p coverage &&` fixed it, exit 0. But the report then contained seven SF records, not five: tests/helpers.js, and `../../../../../run/awf-lib/trust/node-trust.cjs`, a shim this runner injects through NODE_OPTIONS from outside the repo. That dragged the reported total to 81.14%. Adding `--test-coverage-include='src/**'` left exactly the five files in src/ at 98.04% of lines — 100% for db.js, handlers.js, report.js and util.js, 82.61% for server.js, whose uncovered lines are 18-21.",
+      "changed": "Set commands.coverage to the mkdir + node form with the include filter, and coverage_report to {path: coverage/lcov.info, format: lcov}. Recorded the two things I left off — the whole-process default scope and node's own --test-coverage-lines thresholds — under `dropped` with why."
+    },
+    {
+      "attempt": 15,
+      "tried": "Checked the report against the thing that will read it, rather than against the pretty-printed table. Read bsf's lcov parser and diff-coverage in the extracted runner, then inspected coverage/lcov.info directly, then re-ran the whole coverage command under the stripped environment.",
+      "observed": "The parser resolves an SF path with path.relative only when it is absolute and otherwise takes it as given; node writes `SF:src/db.js`, already repo-relative, so changed-file paths will match with no rewriting. diffCoverage skips a changed file that has no entry (`if (entry === undefined) continue`), so narrowing the report to src/** cannot make a tests-only PR look uncovered. The trial requires the command to exit 0 and the report to contain at least one file: five files, 98.04%. Under `env -i` the result is identical, and the awf-lib shim disappears anyway because the trial's closed environment carries no NODE_OPTIONS.",
+      "changed": "Nothing further in the manifest. Left .factory/guardrails/coverage.json alone: its floor is 0 and the runner raises high_pct and floor_pct itself once a gate measures a real total, so setting a floor by hand here would only risk tripping the coverage_floor_lowered policy check later."
+    },
+    {
+      "attempt": 16,
+      "tried": "Checked that adding tests did not disturb the static gate: ran `npx eslint src` and `npx eslint .` and compared both against .factory/guardrails/baselines.json.",
+      "observed": "Both report 36 problems — no-var 32, eqeqeq 3, no-console 1 — exactly the recorded baselines. eslint.config.mjs has a single config block scoped to `files: [\"src/**/*.js\"]`, so the six new files under tests/ match no configuration and no rule applies to them, even though they are written in the same `var` style as src/.",
+      "changed": "Nothing — guardrails are out of scope for an amendment, so no patch is produced. Added a not_exercised entry saying tests/ is unlinted and what it would cost to change that, so the fact is recorded rather than discovered by whoever widens the config."
+    },
+    {
+      "attempt": 17,
+      "tried": "Validated the amended manifest with `.factory/bin/bsf sandbox check --file /tmp/gh-aw/agent/bsf/setup/manifest.json`.",
+      "observed": "valid sandbox manifest, tier renders. The tier is unchanged from round 1 — the app still starts and renders, which is already the top tier; what this amendment adds is that the build-and-test half beneath it is now real rather than null.",
+      "changed": null
+    },
+    {
+      "attempt": 18,
+      "tried": "trial of round 1: install, test, control, run",
+      "observed": "reached renders, as claimed",
+      "changed": null
     }
   ],
-  "frozen_at": "2026-11-21T08:06:10.979Z"
+  "frozen_at": "2026-11-21T16:04:46.411Z"
 }
