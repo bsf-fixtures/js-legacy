@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T08:20:13.770Z",
+  "updated_at": "2026-11-21T08:22:34.415Z",
   "open": [
     {
       "work_item": "wi_01M7Y4H6GSWY2F7HGEA1BGSZGM",
@@ -176,6 +176,17 @@
       "created_at": "2026-11-21T08:20:13.770Z",
       "fixes": [
         "dead code"
+      ]
+    },
+    {
+      "work_item": "wi_01M7YK6DNF35J41BE16MVFXC0M",
+      "pipeline": "gardening",
+      "status": "queued",
+      "fingerprint": "sha256:c3ff33c4e222e3ea5a7c7e8a38dfcb66f73025e49d77f77ed40ab4e0f39c60e5",
+      "priority": "normal",
+      "created_at": "2026-11-21T08:22:34.415Z",
+      "fixes": [
+        "duplicate implementations of one concern (money formatting, total calculation)"
       ]
     }
   ],
