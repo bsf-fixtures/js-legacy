@@ -1,11 +1,11 @@
-var db = require("./db");
+const db = require("./db");
 
 // second way of totalling things, written before util.total existed
 function totals() {
-  var items = db.all();
-  var t = 0;
-  var count = 0;
-  for (var i = 0; i < items.length; i++) {
+  const items = db.all();
+  let t = 0;
+  let count = 0;
+  for (let i = 0; i < items.length; i++) {
     t += items[i].qty * items[i].price;
     count += items[i].qty;
   }
@@ -18,8 +18,8 @@ function fmt(n) {
 }
 
 function render(req, res) {
-  var t = totals();
-  var html = "<html><body><h1>Report</h1>";
+  const t = totals();
+  let html = "<html><body><h1>Report</h1>";
   html += "<p>lines: " + t.lines + "</p>";
   html += "<p>units: " + t.units + "</p>";
   html += "<p>value: " + fmt(t.value) + "</p>";

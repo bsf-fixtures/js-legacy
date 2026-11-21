@@ -1,8 +1,8 @@
-var express = require("express");
-var handlers = require("./handlers");
-var report = require("./report");
+const express = require("express");
+const handlers = require("./handlers");
+const report = require("./report");
 
-var app = express();
+const app = express();
 app.use(express.urlencoded({ extended: false }));
 
 app.get("/", handlers.index);
@@ -12,7 +12,7 @@ app.get("/export", handlers.exportCsv);
 app.get("/report", report.render);
 app.get("/health", handlers.health);
 
-var port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 if (require.main === module) {
   app.listen(port, function () {

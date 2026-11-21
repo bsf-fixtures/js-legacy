@@ -1,14 +1,14 @@
-var db = require("./db");
-var util = require("./util");
+const db = require("./db");
+const util = require("./util");
 
 // TODO: split this file up
 function index(req, res) {
-  var items = db.all();
-  var html = "<html><head><title>Stock</title></head><body>";
+  const items = db.all();
+  let html = "<html><head><title>Stock</title></head><body>";
   html = html + "<h1>Stock</h1>";
   html = html + "<table border=1>";
   html = html + "<tr><td>id</td><td>name</td><td>qty</td><td>price</td><td></td></tr>";
-  for (var i = 0; i < items.length; i++) {
+  for (let i = 0; i < items.length; i++) {
     html = html + "<tr>";
     html = html + "<td>" + items[i].id + "</td>";
     html = html + "<td>" + util.esc(items[i].name) + "</td>";
@@ -31,9 +31,9 @@ function index(req, res) {
 }
 
 function add(req, res) {
-  var name = req.body.name;
-  var qty = parseInt(req.body.qty, 10);
-  var price = parseInt(req.body.price, 10);
+  const name = req.body.name;
+  let qty = parseInt(req.body.qty, 10);
+  let price = parseInt(req.body.price, 10);
   if (!name) {
     res.status(400).send("name required");
     return;
@@ -49,7 +49,7 @@ function add(req, res) {
 }
 
 function del(req, res) {
-  var id = req.query.id;
+  const id = req.query.id;
   if (!id) {
     res.status(400).send("id required");
     return;
@@ -60,9 +60,9 @@ function del(req, res) {
 
 // csv export. note: this does its own money formatting, see util.money2
 function exportCsv(req, res) {
-  var items = db.all();
-  var out = "id,name,qty,price\n";
-  for (var i = 0; i < items.length; i++) {
+  const items = db.all();
+  let out = "id,name,qty,price\n";
+  for (let i = 0; i < items.length; i++) {
     out = out + items[i].id + "," + items[i].name + "," + items[i].qty + "," + util.money2(items[i].price) + "\n";
   }
   res.setHeader("Content-Type", "text/csv");

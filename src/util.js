@@ -5,8 +5,8 @@ function money(n) {
 }
 
 function total(list) {
-  var t = 0;
-  for (var i = 0; i < list.length; i++) {
+  let t = 0;
+  for (let i = 0; i < list.length; i++) {
     t = t + list[i].qty * list[i].price;
   }
   return t;
