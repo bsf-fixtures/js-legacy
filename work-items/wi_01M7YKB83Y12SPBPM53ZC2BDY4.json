@@ -1,0 +1,23 @@
+{
+  "schema": "work-item/1",
+  "id": "wi_01M7YKB83Y12SPBPM53ZC2BDY4",
+  "created_at": "2026-11-21T08:25:12.574Z",
+  "source": {
+    "kind": "schedule",
+    "ref": null,
+    "actor": "factory",
+    "via": null
+  },
+  "trigger_class": "scheduled",
+  "pipeline": "gardening",
+  "title": "Gardening: one declaration style: var vs const/let (ecmaVersion 2020 is configured but all code uses var)",
+  "body": "found by the gardener\n\nFiles:\n- src/db.js\n- src/handlers.js\n- src/report.js\n- src/server.js\n- src/util.js",
+  "priority": "normal",
+  "fingerprint": "sha256:476455f19dcd51331dfa29f431dbbb1d3644e6b02782973657f9695c51e976c1",
+  "status": "queued",
+  "runs": [],
+  "pr": null,
+  "parent": null,
+  "related": [],
+  "spec": null
+}

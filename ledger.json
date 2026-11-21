@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T08:22:34.415Z",
+  "updated_at": "2026-11-21T08:25:12.574Z",
   "open": [
     {
       "work_item": "wi_01M7Y4H6GSWY2F7HGEA1BGSZGM",
@@ -187,6 +187,17 @@
       "created_at": "2026-11-21T08:22:34.415Z",
       "fixes": [
         "duplicate implementations of one concern (money formatting, total calculation)"
+      ]
+    },
+    {
+      "work_item": "wi_01M7YKB83Y12SPBPM53ZC2BDY4",
+      "pipeline": "gardening",
+      "status": "queued",
+      "fingerprint": "sha256:476455f19dcd51331dfa29f431dbbb1d3644e6b02782973657f9695c51e976c1",
+      "priority": "normal",
+      "created_at": "2026-11-21T08:25:12.574Z",
+      "fixes": [
+        "one declaration style: var vs const/let (ecmaVersion 2020 is configured but all code uses var)"
       ]
     }
   ],
