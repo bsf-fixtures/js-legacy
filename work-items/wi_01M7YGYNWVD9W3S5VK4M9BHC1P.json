@@ -14,8 +14,10 @@
   "body": "found by the gardener\n\nFiles:\n- src/handlers.js\n- src/server.js\n- test/handlers.test.js",
   "priority": "normal",
   "fingerprint": "sha256:0cbbe6c2eb44970aa0241203b40f093fc6731d25c717cee43fa7796fbaabd0e4",
-  "status": "queued",
-  "runs": [],
+  "status": "running",
+  "runs": [
+    "run_01M7YKX4H0T7V241SAXMWKGT3Z"
+  ],
   "pr": null,
   "parent": null,
   "related": [],
